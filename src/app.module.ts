@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { User } from './users/user.entity';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { User } from './users/user.entity';
       entities: [User],
       synchronize: true, // 개발 환경에서만 true (자동 마이그레이션)
     }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
