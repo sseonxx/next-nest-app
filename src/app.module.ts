@@ -10,7 +10,7 @@ import { AuthModule } from './auth/auth.module';
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres', // 선택한 데이터베이스 타입
-      host: 'localhost', 
+      host: 'localhost',
       port: 5432,
       username: 'seoeun',
       password: 'seoeun123',
