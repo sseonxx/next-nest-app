@@ -1,11 +1,13 @@
 'use client';
 
+import { useSignUp } from '@/hooks/auth/useAuth';
 import { FormEvent, useState } from 'react';
 
 export default function SignupPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const { mutate: signUp, isLoading } = useSignUp();
 
     const handleSubmit = (e:
         FormEvent) => {
@@ -14,6 +16,7 @@ export default function SignupPage() {
             alert('Passwords do not match!');
             return;
         }
+        signUp({ email: email, password: password })
         console.log('Signup:', { email, password });
     };
 

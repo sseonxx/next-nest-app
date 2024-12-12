@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { AxiosResponse } from "axios";
 import apiInstance from "../api";
 
@@ -18,15 +18,11 @@ export interface AuthResponse {
 }
 
 // 회원가입
-export const signUpApi = (
-  data: AuthRequest
-): Promise<AxiosResponse<AuthResponse>> => {
+export const signUpApi = (data: AuthRequest): Promise<AxiosResponse<any>> => {
   return apiInstance.post("/auth/signup", data);
 };
 
 // 로그인
-export const loginApi = (
-  data: AuthRequest
-): Promise<AxiosResponse<AuthResponse>> => {
+export const loginApi = (data: AuthRequest): Promise<AxiosResponse<any>> => {
   return apiInstance.post("/auth/login", data);
 };
