@@ -23,7 +23,7 @@ export class AuthService {
     return false;
   }
 
-  async login(email: string) {
+  async getAccessToken(email: string) {
     const payload = { email };
     return {
       accessToken: this.jwtService.sign(payload),

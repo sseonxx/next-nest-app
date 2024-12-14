@@ -49,6 +49,7 @@ export class AuthController {
     if (!isValid) {
       return { message: 'Invalid credentials' };
     }
-    return { message: 'Login successful' };
+    const token = await this.authService.getAccessToken(body.email);
+    return { message: 'Login successful', token: token.accessToken };
   }
 }

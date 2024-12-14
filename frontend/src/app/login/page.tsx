@@ -1,18 +1,35 @@
 'use client'
+import { useLogin } from '@/hooks/auth/useAuth';
 import React, { FormEvent, useState } from 'react'
 
 const LoginPage = () => {
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  // const { mutate: login } = useLogin();
+  const loginMutation = useLogin();
 
-    const handleSubmit = (e: FormEvent) => {
-        e.preventDefault();
-        console.log("login: ", email, password);
 
-    }
-    return (
-<div className="flex flex-col items-center justify-center h-[80vh]">
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    console.log("login: ", email, password);
+
+    // const auth = login({ email: email, password: password })
+    loginMutation.mutate({ email, password },
+      {
+        onSuccess: (res) => {
+          console.log("페이지 로그안: ", res.data);
+        },
+        onError: (error) => {
+          console.log("Login Error : ", error);
+
+        }
+      },
+    );
+
+  }
+  return (
+    <div className="flex flex-col items-center justify-center h-[80vh]">
       <h1 className="text-2xl font-bold mb-6">Login</h1>
       <form
         onSubmit={handleSubmit}
@@ -50,7 +67,7 @@ const LoginPage = () => {
         </button>
       </form>
     </div>
-    )
+  )
 }
 
 export default LoginPage

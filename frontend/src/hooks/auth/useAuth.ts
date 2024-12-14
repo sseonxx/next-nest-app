@@ -10,22 +10,18 @@ export const useSignUp = () =>
       console.log("회원가입 성공:", response.data);
     },
     onError: (error) => {
-      console.error("로그인 실패:", error);
+      console.error("회원가입 실패:", error);
     },
   });
+
 // 로그인 Hook
-// export const useLogin = () => {
-//   return useMutation((data: { email: string; password: string }) =>
-//     loginApi(data)
-//   );
-// };
 export const useLogin = () =>
-  useMutation((data) => loginApi(data), {
+  useMutation({
+    mutationFn: loginApi,
     onSuccess: (response) => {
-      console.log("로그인 성공:", response.data);
-      localStorage.setItem("token", response.data.accessToken); // JWT 저장
+      console.log("로그인 성공: ", response.data);
     },
     onError: (error) => {
-      console.error("로그인 실패:", error);
+      console.log("로그인 실패:", error);
     },
   });
