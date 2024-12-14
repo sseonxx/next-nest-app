@@ -1,27 +1,34 @@
 'use client'
 import { useLogin } from '@/hooks/auth/useAuth';
+import { useRouter } from 'next/navigation';
+
 import React, { FormEvent, useState } from 'react'
 
 const LoginPage = () => {
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  // const { mutate: login } = useLogin();
+  const router = useRouter(); // *next/router 이 아닌 next/navigation로 import 
   const loginMutation = useLogin();
 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     console.log("login: ", email, password);
 
-    // const auth = login({ email: email, password: password })
     loginMutation.mutate({ email, password },
       {
         onSuccess: (res) => {
           console.log("페이지 로그안: ", res.data);
+          const item = res.data;
+          localStorage.setItem("token", item.token)
+          router.push("/");
+
         },
         onError: (error) => {
           console.log("Login Error : ", error);
+          setMessage("잘못된 이메일 또는 비밀번호")
 
         }
       },
@@ -44,7 +51,7 @@ const LoginPage = () => {
             type="email"
             className="w-full border border-gray-300 p-2 rounded-lg"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => { setEmail(e.target.value); setMessage(""); }}
           />
         </div>
         <div className="mb-4">
@@ -56,9 +63,10 @@ const LoginPage = () => {
             type="password"
             className="w-full border border-gray-300 p-2 rounded-lg"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => { setPassword(e.target.value); setMessage("") }}
           />
         </div>
+        <div>{message}</div>
         <button
           type="submit"
           className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 w-full"

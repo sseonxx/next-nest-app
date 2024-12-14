@@ -21,9 +21,6 @@ export class AuthController {
       },
     },
   })
-  // async signUp(@Body() body: { email: string; password: string }) {
-  //   return this.authService.signUp(body.email, body.password);
-  // }
   async signUp(@Body() body: AuthDto) {
     return this.authService.signUp(body.email, body.password);
   }
@@ -46,10 +43,7 @@ export class AuthController {
       body.email,
       body.password,
     );
-    if (!isValid) {
-      return { message: 'Invalid credentials' };
-    }
-    const token = await this.authService.getAccessToken(body.email);
-    return { message: 'Login successful', token: token.accessToken };
+
+    return isValid;
   }
 }

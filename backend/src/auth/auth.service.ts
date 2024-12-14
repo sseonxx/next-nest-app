@@ -1,5 +1,5 @@
 import { UsersService } from './../users/users.service';
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 
@@ -15,15 +15,19 @@ export class AuthService {
     return this.usersService.create(email, hashedPassword);
   }
 
-  async validateUser(email: string, password: string): Promise<boolean> {
-    const user = await this.usersService.findByEmail(email);
-    if (user && (await bcrypt.compare(password, user.password))) {
-      return true;
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<{ token: string }> {
+    const user = await this.usersService.findByEmail(email); // 이메일로 사용자 조회
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      throw new HttpException('Invalid Credentials', HttpStatus.UNAUTHORIZED);
     }
-    return false;
+    const token = await this.generateToken(user.email);
+    return { token: token.accessToken };
   }
 
-  async getAccessToken(email: string) {
+  async generateToken(email: string) {
     const payload = { email };
     return {
       accessToken: this.jwtService.sign(payload),
