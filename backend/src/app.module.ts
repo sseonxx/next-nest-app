@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { User } from './users/user.entity';
 import { AuthModule } from './auth/auth.module';
+import { BoardsModule } from './boards/boards.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AuthModule } from './auth/auth.module';
       synchronize: true, // 개발 환경에서만 true (자동 마이그레이션)
     }),
     AuthModule,
+    BoardsModule, // <<CLI 생성시 자동으로 인식
   ],
   controllers: [AppController],
   providers: [AppService],
