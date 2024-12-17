@@ -1,7 +1,19 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { BoardsService } from './boards.service';
 import { Board } from './board.model';
 import { CreateBoardDto } from './dto/create-board.dto';
+import { ApiBody } from '@nestjs/swagger';
+import { UpdateBoardDto } from './dto/update-board.dto';
 /*
 $ nest g controller boards --no-spec
 */
@@ -15,6 +27,15 @@ export class BoardsController {
   }
 
   @Post()
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        description: { type: 'string' },
+      },
+    },
+  })
   async createBoard(@Body() createBoardDto: CreateBoardDto): Promise<Board> {
     return this.boardsService.createBoard(createBoardDto);
   }
@@ -25,11 +46,29 @@ export class BoardsController {
     return this.boardsService.getBoardById(id);
   }
 
-  /* 특정 게시물 지우기기 */
+  /* 특정 게시물 지우기 */
   @Delete('/:id')
   async deleteBoard(@Param('id') id: string): Promise<void> {
     this.boardsService.deleteBoard(id);
   }
 
   /* 특정 게시물의 상태 업데이트 */
+  @Patch('/:id')
+  @UsePipes(ValidationPipe) //DTO를 서비스에 전달하기 전에 NestJS의 ValidationPipe를 사용해 DTO의 유효성을 검사
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        description: { type: 'string' },
+        status: { default: 'PUBLIC' },
+      },
+    },
+  })
+  async updateBoard(
+    @Param('id') id: string,
+    @Body() updateBoardDto: UpdateBoardDto,
+  ): Promise<Board> {
+    return this.boardsService.updateBoard(id, updateBoardDto);
+  }
 }

@@ -27,6 +27,11 @@ export class Board {
   status: BoardStatus;
 }
 
+/*
+유효성 검사
+class-validator와 class-transformer 라이브러리를 이용
+$ npm install class-validator class-transformer
+*/
 export enum BoardStatus {
   PUBLIC = 'PUBLIC',
   PRIVATE = 'PRIVATE',

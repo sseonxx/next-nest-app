@@ -1,5 +1,5 @@
 import { UpdateBoardDto } from './dto/update-board.dto';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Board, BoardStatus } from './board.model';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -20,17 +20,12 @@ export class BoardsService {
   async createBoard(createBoardDto: CreateBoardDto): Promise<Board> {
     const { title, description } = createBoardDto;
 
-    const board: CreateBoardDto = {
-      title: title, // title ==  title: title,
-      description: description, //description ==  description: description,
-    };
-
-    // this.boards.push(board);
-    return this.boardRepository.create({
+    const board = this.boardRepository.create({
       title,
       description,
       status: BoardStatus.PUBLIC,
     });
+    return this.boardRepository.save(board);
   }
   /*
       ※게시물 ID 처리
@@ -39,17 +34,32 @@ export class BoardsService {
   
   */
 
-  getBoardById(id: string): Board {
-    return this.boards.find((board) => board.id === id);
+  async getBoardById(id: string): Promise<Board> {
+    return this.boardRepository.findOne({ where: { id } });
   }
 
   deleteBoard(id: string): void {
     this.boards = this.boards.filter((board) => board.id !== id);
   }
 
-  async updateBoard(updateBoardDto: UpdateBoardDto): Promise<Board> {
-    const { id, title, description, status } = updateBoardDto;
-    this.boardRepository.update(id, updateBoardDto);
-    return this.boardRepository.findOne({ where: { id } });
+  async updateBoard(
+    id: string,
+    updateBoardDto: UpdateBoardDto,
+  ): Promise<Board> {
+    const { title, description, status } = updateBoardDto;
+    // this.boardRepository.update(id, updateBoardDto); //영속성 컨텍스트에 반영된 내용을 자동으로 반환하지 않기에
+
+    // 기존 엔티티를 찾음
+    const board = await this.getBoardById(id);
+    if (!board) {
+      throw new NotFoundException(`Board with ID:${id} not found`);
+    }
+
+    // 엔티티 내용 업데이트
+    board.title = title ?? board.title;
+    board.description = description ?? board.description;
+    board.status = status ?? board.status;
+
+    return await this.boardRepository.save(board);
   }
 }

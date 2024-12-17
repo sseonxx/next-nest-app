@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { BoardsModule } from './boards/boards.module';
+import { Board } from './boards/board.model';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { BoardsModule } from './boards/boards.module';
       password: 'seoeun123',
       database: 'test_db',
       // entities: [__dirname + '/../**/*.entity.{js,ts}'],
-      entities: [User],
+      entities: [User, Board],
       synchronize: true, // 개발 환경에서만 true (자동 마이그레이션)
     }),
     AuthModule,
