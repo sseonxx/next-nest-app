@@ -35,7 +35,12 @@ export class BoardsService {
   */
 
   async getBoardById(id: string): Promise<Board> {
-    return this.boardRepository.findOne({ where: { id } });
+    const found = await this.boardRepository.findOne({ where: { id } });
+
+    if (!found) {
+      throw new NotFoundException();
+    }
+    return found;
   }
 
   deleteBoard(id: string): void {

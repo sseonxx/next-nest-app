@@ -27,6 +27,7 @@ export class BoardsController {
   }
 
   @Post()
+  @UsePipes(ValidationPipe)
   @ApiBody({
     schema: {
       type: 'object',
