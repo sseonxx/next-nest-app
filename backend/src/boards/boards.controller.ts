@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -49,8 +51,22 @@ export class BoardsController {
 
   /* 특정 게시물 지우기 */
   @Delete('/:id')
-  async deleteBoard(@Param('id') id: string): Promise<void> {
-    this.boardsService.deleteBoard(id);
+  async deleteBoard(
+    @Param('id') id: string,
+  ): Promise<{ message: string; deletedId?: string }> {
+    try {
+      const isDeleted = await this.boardsService.deleteBoardById(id);
+      if (isDeleted) {
+        return { message: 'Item succeeefully deleted', deletedId: id };
+      } else {
+        throw new HttpException('Item not found', HttpStatus.NOT_FOUND);
+      }
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Failed to delete item',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   /* 특정 게시물의 상태 업데이트 */

@@ -1,5 +1,9 @@
 import { UpdateBoardDto } from './dto/update-board.dto';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Board, BoardStatus } from './board.model';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -38,13 +42,29 @@ export class BoardsService {
     const found = await this.boardRepository.findOne({ where: { id } });
 
     if (!found) {
-      throw new NotFoundException();
+      throw new NotFoundException(`Can't find Board with id:${id}`);
     }
     return found;
   }
 
-  deleteBoard(id: string): void {
-    this.boards = this.boards.filter((board) => board.id !== id);
+  async deleteBoardById(id: string): Promise<boolean> {
+    try {
+      const result = await this.boardRepository.delete(id);
+      /*
+      {
+        raw: {}, // 원시 데이터베이스 응답
+        affected: 1 // 영향을 받은(삭제된) 행의 수
+      }
+       */
+      if (result.affected === 0) {
+        throw new NotFoundException(`Can't find Board with id:${id}`);
+      }
+      return true;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to delete item(service Layer)',
+      );
+    }
   }
 
   async updateBoard(
