@@ -1,7 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
+import { AuthDto } from 'src/auth/auth.dto';
 
 @Injectable()
 export class UsersService {
@@ -14,8 +19,20 @@ export class UsersService {
     return this.userRepository.findOne({ where: { email } });
   }
 
-  async create(email: string, password: string): Promise<User> {
-    const user = this.userRepository.create({ email, password });
-    return this.userRepository.save(user);
+  async create(authDto: AuthDto): Promise<User> {
+    const { email, username, password } = authDto;
+
+    try {
+      const user = this.userRepository.create({ email, username, password });
+      await this.userRepository.save(user);
+      return user;
+    } catch (error) {
+      if (error.code === '23505') {
+        throw new ConflictException('Existing username');
+      } else {
+        throw new InternalServerErrorException();
+      }
+      console.log(error);
+    }
   }
 }

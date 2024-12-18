@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthDto } from './auth.dto';
@@ -18,11 +18,12 @@ export class AuthController {
       properties: {
         email: { type: 'string' },
         password: { type: 'string' },
+        username: { type: 'string' },
       },
     },
   })
-  async signUp(@Body() body: AuthDto) {
-    return this.authService.signUp(body.email, body.password);
+  async signUp(@Body(ValidationPipe) authDto: AuthDto) {
+    return this.authService.signUp(authDto);
   }
 
   @Post('login')

@@ -1,3 +1,4 @@
+import { AuthDto } from './auth.dto';
 import { UsersService } from './../users/users.service';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -10,9 +11,15 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async signUp(email: string, password: string) {
+  async signUp(authDto: AuthDto) {
+    const { email, password, username } = authDto;
     const hashedPassword = await bcrypt.hash(password, 10);
-    return this.usersService.create(email, hashedPassword);
+    const resultAuthDto: AuthDto = {
+      email,
+      username,
+      password: hashedPassword,
+    };
+    return this.usersService.create(resultAuthDto);
   }
 
   async validateUser(
