@@ -11,14 +11,13 @@ import { CreateBoardDto } from './dto/create-board.dto';
 
 @Injectable()
 export class BoardsService {
-  private boards: Board[] = [];
   constructor(
     @InjectRepository(Board)
     private readonly boardRepository: Repository<Board>,
   ) {}
 
-  getAllBoards(): Board[] {
-    return this.boards;
+  async getAllBoards(): Promise<[Board[], number]> {
+    return this.boardRepository.findAndCount();
   }
 
   async createBoard(createBoardDto: CreateBoardDto): Promise<Board> {

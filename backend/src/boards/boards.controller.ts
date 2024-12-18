@@ -24,7 +24,7 @@ export class BoardsController {
   constructor(private readonly boardsService: BoardsService) {}
 
   @Get('/')
-  async getAllBoards(): Promise<Board[]> {
+  async getAllBoards(): Promise<[Board[], number]> {
     return this.boardsService.getAllBoards();
   }
 
