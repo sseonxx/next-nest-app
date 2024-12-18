@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Board, BoardStatus } from './board.model';
+import { Board, BoardStatus } from './board.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateBoardDto } from './dto/create-board.dto';
@@ -38,7 +38,7 @@ export class BoardsService {
   
   */
 
-  async getBoardById(id: string): Promise<Board> {
+  async getBoardById(id: number): Promise<Board> {
     const found = await this.boardRepository.findOne({ where: { id } });
 
     if (!found) {
@@ -68,7 +68,7 @@ export class BoardsService {
   }
 
   async updateBoard(
-    id: string,
+    id: number,
     updateBoardDto: UpdateBoardDto,
   ): Promise<Board> {
     const { title, description, status } = updateBoardDto;

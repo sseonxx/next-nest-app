@@ -12,7 +12,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { BoardsService } from './boards.service';
-import { Board } from './board.model';
+import { Board } from './board.entity';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { ApiBody } from '@nestjs/swagger';
 import { UpdateBoardDto } from './dto/update-board.dto';
@@ -45,7 +45,7 @@ export class BoardsController {
 
   /* 특정 게시물 가져오기 */
   @Get('/:id')
-  async getBoardById(@Param('id') id: string): Promise<Board> {
+  async getBoardById(@Param('id') id: number): Promise<Board> {
     return this.boardsService.getBoardById(id);
   }
 
@@ -83,7 +83,7 @@ export class BoardsController {
     },
   })
   async updateBoard(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateBoardDto: UpdateBoardDto,
   ): Promise<Board> {
     return this.boardsService.updateBoard(id, updateBoardDto);

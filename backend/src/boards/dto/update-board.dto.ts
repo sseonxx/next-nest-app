@@ -1,5 +1,5 @@
 import { IsEnum } from 'class-validator';
-import { BoardStatus } from '../board.model';
+import { BoardStatus } from '../board.entity';
 
 /*
 ValidationPipe는 Dto에 있는 데코레이션 기준으로 유효성 검사를 실행합니다.
