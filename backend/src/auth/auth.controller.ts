@@ -1,7 +1,21 @@
-import { Body, Controller, Post, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Req,
+  UseGuards,
+  ValidationPipe,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthDto } from './auth.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Auth') // Swagger에서 그룹 태그
 @Controller('auth')
@@ -39,12 +53,22 @@ export class AuthController {
       },
     },
   })
-  async login(@Body() body: { email: string; password: string }) {
+  async login(
+    @Body() body: { email: string; password: string },
+  ): Promise<{ accessToken: string }> {
     const isValid = await this.authService.validateUser(
       body.email,
       body.password,
     );
 
     return isValid;
+  }
+
+  @Post('test')
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth() // Swagger UI에서 Bearer 토큰 사용 가능하도록 설정
+  test(@Req() req) {
+    console.log('req >>', req);
+    return { message: 'Token is valid', user: req.user };
   }
 }

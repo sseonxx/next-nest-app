@@ -13,7 +13,9 @@ export class AuthService {
 
   async signUp(authDto: AuthDto) {
     const { email, password, username } = authDto;
-    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(password, salt);
     const resultAuthDto: AuthDto = {
       email,
       username,
@@ -25,13 +27,17 @@ export class AuthService {
   async validateUser(
     email: string,
     password: string,
-  ): Promise<{ token: string }> {
+  ): Promise<{ accessToken: string }> {
     const user = await this.usersService.findByEmail(email); // 이메일로 사용자 조회
     if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new HttpException('Invalid Credentials', HttpStatus.UNAUTHORIZED);
     }
-    const token = await this.generateToken(user.email);
-    return { token: token.accessToken };
+    // 유저토큰 생성 (Secret + Payload)
+    const payload = { email: user.email };
+
+    const accessToken = await this.jwtService.sign(payload);
+
+    return { accessToken };
   }
 
   async generateToken(email: string) {
@@ -41,3 +47,9 @@ export class AuthService {
     };
   }
 }
+/*
+$ curl -X 'POST' \
+  'http://localhost:4000/auth/test' \
+   -H "Accept: application/json" \
+   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3Q1QG5hdmVyLmNvbSIsImlhdCI6MTczNDYwNDY5NCwiZXhwIjoxNzM0NjA4Mjk0fQ.2hHK1ZbOYaYwg6zRPwEiROSBJDkhebaasVeAVS9bXyI" \
+*/
