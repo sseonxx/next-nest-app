@@ -1,9 +1,11 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Post,
   Req,
   UseGuards,
+  UseInterceptors,
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -66,6 +68,7 @@ export class AuthController {
 
   @Post('test')
   @UseGuards(AuthGuard())
+  @UseInterceptors(ClassSerializerInterceptor)
   @ApiBearerAuth() // Swagger UI에서 Bearer 토큰 사용 가능하도록 설정
   test(@Req() req) {
     console.log('req >>', req);
