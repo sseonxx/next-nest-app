@@ -18,6 +18,7 @@ import {
 } from '@nestjs/swagger';
 import { AuthDto } from './auth.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from './get-user.decorator';
 
 @ApiTags('Auth') // Swagger에서 그룹 태그
 @Controller('auth')
@@ -73,5 +74,14 @@ export class AuthController {
   test(@Req() req) {
     console.log('req >>', req);
     return { message: 'Token is valid', user: req.user };
+  }
+
+  // @GetUser() 커스텀 데코레이팅
+  @Post('test2')
+  @UseGuards(AuthGuard())
+  @UseInterceptors(ClassSerializerInterceptor)
+  @ApiBearerAuth() // Swagger UI에서 Bearer 토큰 사용 가능하도록 설정
+  test2(@GetUser() user) {
+    return { message: 'Token is valid', user: user };
   }
 }
