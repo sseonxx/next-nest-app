@@ -18,6 +18,8 @@ import { CreateBoardDto } from './dto/create-board.dto';
 import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from 'src/auth/get-user.decorator';
+import { User } from 'src/users/user.entity';
 /*
 $ nest g controller boards --no-spec
 */
@@ -43,8 +45,11 @@ export class BoardsController {
       },
     },
   })
-  async createBoard(@Body() createBoardDto: CreateBoardDto): Promise<Board> {
-    return this.boardsService.createBoard(createBoardDto);
+  async createBoard(
+    @Body() createBoardDto: CreateBoardDto,
+    @GetUser() user: User,
+  ): Promise<Board> {
+    return this.boardsService.createBoard(createBoardDto, user);
   }
 
   /* 특정 게시물 가져오기 */

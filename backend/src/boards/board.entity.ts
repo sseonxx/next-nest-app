@@ -27,7 +27,7 @@ export class Board {
   @Column()
   status: BoardStatus;
 
-  @ManyToOne((type) => User, (user) => user.boards, { eager: true })
+  @ManyToOne((type) => User, (user) => user.boards, { eager: false })
   user: User;
 }
 
