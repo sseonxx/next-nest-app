@@ -51,6 +51,14 @@ export class BoardsService {
     return found;
   }
 
+  async getBoardByParam(user: User): Promise<Board[]> {
+    const query = this.boardRepository.createQueryBuilder('board');
+    query.where('board.userId = :userId', { userId: user.id });
+
+    const boards = await query.getMany();
+    return boards;
+  }
+
   async deleteBoardById(id: string): Promise<boolean> {
     try {
       const result = await this.boardRepository.delete(id);

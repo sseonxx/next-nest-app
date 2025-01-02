@@ -17,4 +17,5 @@ export const typeORMConfig: TypeOrmModuleOptions = {
     엔티티안에서 수정된 컬럼의 길이 탕비 변경값들을 해당 테이블을 
     Drop 한 후 다시 생성한다.
   */
+  logging: true, // 로그 활성화
 };

@@ -29,7 +29,7 @@ $ nest g controller boards --no-spec
 export class BoardsController {
   constructor(private readonly boardsService: BoardsService) {}
 
-  @Get('/')
+  @Get()
   async getAllBoards(): Promise<[Board[], number]> {
     return this.boardsService.getAllBoards();
   }
@@ -51,8 +51,14 @@ export class BoardsController {
   ): Promise<Board> {
     return this.boardsService.createBoard(createBoardDto, user);
   }
+  /* 사용자 게시물 가져오기 *정적 라우팅을 동적 라우팅보다 우선적으로 선언하여 충돌 방지*/
+  @Get('/myboard')
+  async getBoardByParam(@GetUser() user: User): Promise<Board[]> {
+    console.log('user:', user);
+    return this.boardsService.getBoardByParam(user);
+  }
 
-  /* 특정 게시물 가져오기 */
+  /* 특정 게시물 가져오기 *동적 라우팅*/
   @Get('/:id')
   async getBoardById(@Param('id') id: number): Promise<Board> {
     return this.boardsService.getBoardById(id);
