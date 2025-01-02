@@ -67,10 +67,11 @@ export class BoardsController {
   /* 특정 게시물 지우기 */
   @Delete('/:id')
   async deleteBoard(
-    @Param('id') id: string,
-  ): Promise<{ message: string; deletedId?: string }> {
+    @Param('id') id: number,
+    @GetUser() user: User,
+  ): Promise<{ message: string; deletedId?: number }> {
     try {
-      const isDeleted = await this.boardsService.deleteBoardById(id);
+      const isDeleted = await this.boardsService.deleteBoardById(id, user);
       if (isDeleted) {
         return { message: 'Item succeeefully deleted', deletedId: id };
       } else {

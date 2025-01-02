@@ -1,5 +1,6 @@
 import { UpdateBoardDto } from './dto/update-board.dto';
 import {
+  HttpException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -9,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { User } from 'src/users/user.entity';
+import { UnauthorizedBoardAccessException } from './exceptions/unauthorized-board-access.exception';
 
 @Injectable()
 export class BoardsService {
@@ -59,22 +61,47 @@ export class BoardsService {
     return boards;
   }
 
-  async deleteBoardById(id: string): Promise<boolean> {
+  async deleteBoardById(id: number, user: User): Promise<boolean> {
     try {
-      const result = await this.boardRepository.delete(id);
-      /*
+      // 게시글 조회
+      const board = await this.boardRepository.findOne({
+        where: { id },
+        relations: ['user'],
+      });
+
+      if (!board) {
+        throw new NotFoundException(`Board with id ${id} not found`);
+      }
+
+      //게시글 소유자 확인
+      if (board.user.id !== user.id) {
+        throw new UnauthorizedBoardAccessException(
+          'You are not authorized to delete this board',
+        );
+      }
+
+      console.log('여기 넘어가?');
+
+      // 게시글 삭제
+      const result = await this.boardRepository.delete({ id });
+      /* result =
       {
         raw: {}, // 원시 데이터베이스 응답
         affected: 1 // 영향을 받은(삭제된) 행의 수
       }
        */
       if (result.affected === 0) {
-        throw new NotFoundException(`Can't find Board with id:${id}`);
+        throw new NotFoundException(`Failed to delete Board with id ${id}`);
       }
+
       return true;
     } catch (error) {
+      if (error instanceof HttpException) {
+        // 이 코드를 추가하지 않으면 InternalServerErrorException 로 빠진다.
+        throw error; // 커스텀 예외 또는 NestJS 기본 예외 재발생
+      }
       throw new InternalServerErrorException(
-        'Failed to delete item(service Layer)',
+        'An unexpected error occurred while deleting the board',
       );
     }
   }
