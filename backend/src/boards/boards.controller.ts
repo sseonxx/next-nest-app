@@ -8,18 +8,22 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { BoardsService } from './boards.service';
 import { Board } from './board.entity';
 import { CreateBoardDto } from './dto/create-board.dto';
-import { ApiBody } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { UpdateBoardDto } from './dto/update-board.dto';
+import { AuthGuard } from '@nestjs/passport';
 /*
 $ nest g controller boards --no-spec
 */
 @Controller('boards')
+@UseGuards(AuthGuard())
+@ApiBearerAuth()
 export class BoardsController {
   constructor(private readonly boardsService: BoardsService) {}
 

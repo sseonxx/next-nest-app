@@ -1,5 +1,12 @@
 import { Exclude } from 'class-transformer';
-import { Entity, PrimaryGeneratedColumn, Column, Unique } from 'typeorm';
+import { Board } from 'src/boards/board.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  Unique,
+  OneToMany,
+} from 'typeorm';
 
 @Entity()
 @Unique(['username'])
@@ -20,4 +27,7 @@ export class User {
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);
   }
+
+  @OneToMany((type) => Board, (board) => board.user, { eager: false })
+  boards: Board[];
 }
