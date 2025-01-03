@@ -1,0 +1,12 @@
+server:
+  port: 4000
+
+db: 
+  type: postgres
+  port: 5432
+  database: test_db
+
+jwt:
+  expiresIn: 3600
+
+

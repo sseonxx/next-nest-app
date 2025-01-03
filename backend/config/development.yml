@@ -1,0 +1,8 @@
+db:
+  host: localhost
+  username: seoeun
+  password: seoeun123
+  synchronize: true
+
+jwt:
+  secret: IIBBy4mUH0VwZY1p4pk8CjfA7kHo7rqNYFcJHreegOQ=

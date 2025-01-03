@@ -5,6 +5,9 @@ import { UsersModule } from 'src/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
+import * as config from 'config';
+
+const jwtConfig = config.get('jwt');
 
 @Module({
   imports: [
@@ -12,9 +15,9 @@ import { JwtStrategy } from './jwt.strategy';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       //$ openssl rand -base64 32
-      secret: 'IIBBy4mUH0VwZY1p4pk8CjfA7kHo7rqNYFcJHreegOQ=',
+      secret: jwtConfig.secret,
       signOptions: {
-        expiresIn: 60 * 60,
+        expiresIn: jwtConfig.expiresIn,
       },
     }),
   ],
