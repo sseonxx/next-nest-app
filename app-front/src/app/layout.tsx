@@ -55,7 +55,7 @@ export default function RootLayout({
             </li>
           </ul>
         </header>
-        <main style={{height:"800px", border:"solid"}}>
+        <main style={{ border:"solid"}}>
           {children}
         </main>
         <footer style={{height:"100px",border:"solid"}}>

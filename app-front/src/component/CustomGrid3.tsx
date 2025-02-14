@@ -1,87 +1,111 @@
-import React, { useMemo } from "react";
-import {
-  useReactTable,
-  getCoreRowModel,
-  getExpandedRowModel,
-  ColumnDef,
-} from "@tanstack/react-table";
+"use client"
 
-const data = [
-  { month: "2024.1", cost: 1000, category: "식비" },
-  { month: "2024.1", cost: 2000, category: "쇼핑" },
-  { month: "2024.2", cost: 3000, category: "교통비" },
-  { month: "2024.2", cost: 4000, category: "쇼핑" },
+import React, { useState } from 'react';
+import { MaterialReactTable, type MRT_ColumnDef } from 'material-react-table';
+// import 'material-react-table/dist/index.css';
+
+// 원본 데이터
+interface DataItem {
+  month: string;
+  cost: number;
+  category: string;
+}
+
+const data: DataItem[] = [
+  { month: '2024.1', cost: 1000, category: '식비' },
+  { month: '2024.1', cost: 2000, category: '쇼핑' },
+  { month: '2024.2', cost: 3000, category: '교통비' },
+  { month: '2024.2', cost: 4000, category: '쇼핑' },
 ];
 
-// 🌟 그룹화 데이터 생성
-const groupedData = Object.entries(
-  data.reduce((acc, { month, cost }) => {
-    acc[month] = (acc[month] || 0) + cost;
+// month별 cost 합산 및 상세 데이터 그룹화
+interface GroupedData {
+  month: string;
+  costTotal: number;
+  details: DataItem[];
+}
+
+const groupedData: GroupedData[] = Object.values(
+  data.reduce<Record<string, GroupedData>>((acc, item) => {
+    if (!acc[item.month]) {
+      acc[item.month] = {
+        month: item.month,
+        costTotal: 0,
+        details: [],
+      };
+    }
+    acc[item.month].costTotal += item.cost;
+    acc[item.month].details.push(item);
     return acc;
   }, {})
-).map(([month, total]) => ({
-  month,
-  cost: total,
-  isParent: true,
-  children: data.filter((item) => item.month === month),
-}));
+);
 
-// 🌟 컬럼 정의
-const columns: ColumnDef<(typeof groupedData)[0]>[] = [
+const columns: MRT_ColumnDef<GroupedData>[] = [
   {
-    accessorKey: "month",
-    header: "Month",
-    cell: ({ row, getValue }) => (
-      <span
-        style={{ cursor: "pointer", color: row.original.isParent ? "blue" : "black" }}
-        onClick={() => row.original.isParent && row.toggleExpanded()}
-      >
-        {row.original.isParent ? (row.getIsExpanded() ? "▼" : "▶") : "  "}{String(getValue())}
-      </span>
-    ),
+    accessorKey: 'month',
+    header: 'Month',
   },
-  { accessorKey: "cost", header: "Total Cost" },
+  {
+    accessorKey: 'costTotal',
+    header: 'Total Cost',
+  },
 ];
 
-const CustomGrid3 = () => {
-  const table = useReactTable({
-    data: groupedData,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
-  });
+export default function CustomGrid3() {
+  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+
+  // 행 확장/축소 토글
+  const toggleRow = (month: string) => {
+    setExpandedRows((prev) => ({ ...prev, [month]: !prev[month] }));
+  };
 
   return (
-    <div style={{ margin: "20px" }}>
-      <table border={1} style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
+    <div style={{ margin: '20px' }}>
+      <h2>MaterialReactTable</h2>
+      <MaterialReactTable columns={columns} data={groupedData} />
+
+      <h2>table</h2>
+      <table border={1} style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', marginTop: '20px' }}>
         <thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th key={header.id} style={{ padding: "10px", background: "#ddd" }}>
-                  {String(header.column.columnDef.header)}
-                </th>
-              ))}
-            </tr>
-          ))}
+          <tr style={{ backgroundColor: '#eee' }}>
+            <th style={{ padding: '10px' }}>Month</th>
+            <th style={{ padding: '10px' }}>Total Cost</th>
+          </tr>
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <React.Fragment key={row.id}>
-              <tr style={{ backgroundColor: row.original.isParent ? "#e3f2fd" : "#fff" }}>
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} style={{ padding: "10px" }}>
-                    {String(cell.renderValue())}
-                  </td>
-                ))}
+          {groupedData.map((group) => (
+            <React.Fragment key={group.month}>
+              <tr>
+                <td
+                  style={{ cursor: 'pointer', color: 'blue', fontWeight: 'bold', padding: '10px' }}
+                  onClick={() => toggleRow(group.month)}
+                >
+                  {expandedRows[group.month] ? '▼' : '▶'} {group.month}
+                </td>
+                <td style={{ padding: '10px' }}>{group.costTotal.toLocaleString()} 원</td>
               </tr>
-              {row.getIsExpanded() &&
-                row.original.children.map((child, index) => (
-                  <tr key={index} style={{ backgroundColor: "#f0f0f0" }}>
-                    <td style={{ paddingLeft: "30px" }}>{child.category}</td>
-                    <td>{child.cost}</td>
-                  </tr>
-                ))}
+              {expandedRows[group.month] && (
+                <tr>
+                  <td colSpan={2} style={{ backgroundColor: '#f0f0f0' }}>
+                    <table border={1} style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr>
+                          <th style={{ padding: '5px' }}>Category</th>
+                          <th style={{ padding: '5px' }}>Cost</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {group.details.map((detail, idx) => (
+                          <tr key={idx}>
+                            <td style={{ padding: '5px' }}>{detail.category}</td>
+                            <td style={{ padding: '5px' }}>{detail.cost.toLocaleString()} 원</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              )}
             </React.Fragment>
           ))}
         </tbody>
@@ -89,5 +113,3 @@ const CustomGrid3 = () => {
     </div>
   );
 }
-
-export default CustomGrid3

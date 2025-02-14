@@ -5,7 +5,13 @@ import DataGrid, { Column, Grouping, GroupPanel, Paging } from 'devextreme-react
 import 'devextreme/dist/css/dx.light.css';
 
 // 원본 데이터
-const data = [
+interface DataItem {
+  month: string;
+  cost: number;
+  category: string;
+}
+
+const data: DataItem[] = [
   { month: '2024.1', cost: 1000, category: '식비' },
   { month: '2024.1', cost: 2000, category: '쇼핑' },
   { month: '2024.2', cost: 3000, category: '교통비' },
@@ -13,8 +19,14 @@ const data = [
 ];
 
 // month별 cost 합산 및 상세 데이터 그룹화
-const groupedData = Object.values(
-  data.reduce((acc, item) => {
+interface GroupedData {
+  month: string;
+  costTotal: number;
+  details: DataItem[];
+}
+
+const groupedData: GroupedData[] = Object.values(
+  data.reduce<Record<string, GroupedData>>((acc, item) => {
     if (!acc[item.month]) {
       acc[item.month] = {
         month: item.month,
@@ -29,10 +41,10 @@ const groupedData = Object.values(
 );
 
 export default function CustomGrid() {
-  const [expandedRows, setExpandedRows] = useState([]);
+  const [expandedRows, setExpandedRows] = useState<string[]>([]);
 
   // 행 확장/축소 토글
-  const toggleRow = (month) => {
+  const toggleRow = (month: string) => {
     setExpandedRows((prev) =>
       prev.includes(month) ? prev.filter((m) => m !== month) : [...prev, month]
     );
@@ -62,7 +74,6 @@ export default function CustomGrid() {
               {expandedRows.includes(group.month) && (
                 <tr>
                   <td colSpan={2} style={{ backgroundColor: '#f0f0f0' }}>
-
                     <DataGrid
                       dataSource={group.details}
                       showBorders={true}
