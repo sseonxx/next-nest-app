@@ -1,20 +1,57 @@
 "use client"
 import { getDemoData } from '@/api/dataFetchApi';
 import CustomPieChart from '@/component/CustomPieChart';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Select, MenuItem, FormControl, InputLabel, SelectChangeEvent } from '@mui/material';
+import CustomGrid4 from '@/component/CustomGrid4';
+import { MaterialReactTable, MRT_ColumnDef } from 'material-react-table';
 
 type CampaignItem = {
   CampaignName: string;
   Revenue: number;
 };
 
+type GridColumn = {
+  // CampaignKey
+  CampaignName: string; //캠페인명
+  Commission: number; // 수수료
+  Complete: number; //캠페인 완료수
+  Revenue: number; // 해당월 수익
+  Datetime: string //
+}
+
+
 type Props = {};
 
 const Page = (props: Props) => {
   const [data, setData] = useState<any>(null);
   const [chartData, setChartData] = useState<{ name: string; y: number }[]>([]);
+  const [gridData, setGridData] = useState<GridColumn[]>([]);
   const [selected, setSelected] = useState<{ year: number; month?: number }>({ year: 2021 });
+
+  const columns: MRT_ColumnDef<GridColumn>[] = [
+    {
+      accessorKey: 'CampaignName',
+      header: '캠페인명',
+    },
+    {
+      accessorKey: 'Commission',
+      header: '수수료',
+    },
+    {
+      accessorKey: 'Complete',
+      header: '캠페인 완료 수',
+    },
+    {
+      accessorKey: 'Revenue',
+      header: '월 수익익',
+    },
+    {
+      accessorKey: 'Datetime',
+      header: '시작날짜',
+    },
+  ]
+
 
   const fetchData = async () => {
     try {
@@ -23,6 +60,9 @@ const Page = (props: Props) => {
         : { search_year: selected.year };
 
       const response = await getDemoData(params);
+      console.log("response >>", response);
+
+
       setData(response.data);
     } catch (error: any) {
       console.error("Fetch Error:", error.message);
@@ -38,7 +78,16 @@ const Page = (props: Props) => {
           name: item.CampaignName,
           y: item.Revenue,
         }));
+        const newGridData = campaigns.map((item: GridColumn) => ({
+          CampaignName: item.CampaignName,
+          Commission: item.Commission,
+          Complete: item.Complete,
+          Revenue: item.Revenue,
+          Datetime: item.Datetime
+
+        }));
         setChartData(newChartData);
+        setGridData(newGridData);
         console.log("📊 Chart Data:", newChartData);
       } else {
         console.warn("⚠️ Campaign 데이터가 올바르게 로드되지 않았습니다.");
@@ -109,8 +158,10 @@ const Page = (props: Props) => {
           </Select>
         </FormControl>
       </div>
-
       <CustomPieChart options={options} />
+
+      <MaterialReactTable columns={columns} data={gridData} enableColumnFilters />
+
     </div>
   );
 };
