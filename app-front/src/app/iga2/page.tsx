@@ -109,72 +109,61 @@ const Page = (props: Props) => {
     fetchData();
   }, [selected]);
 
-  useEffect(() => {
-    if (data) {
-      // 모든 Monthly 배열의 Campaign 데이터 병합
-      const allCampaigns = data?.Payment?.Monthly?.flatMap((month: any, index: number) =>
-        month?.App?.flatMap((app: any) =>
-          app?.Campaign?.map((campaign: GridColumn) => ({
-            month: formatToYearMonth(campaign.Datetime),
-            AppKey: app.AppKey,
-            AppName: app.AppName,
-            CampaignKey: campaign.CampaignKey,
-            CampaignName: campaign.CampaignName,
-            Commission: campaign.Commission,
-            Complete: campaign.Complete,
-            Revenue: campaign.Revenue,
-            Datetime: convertDotNetDate(campaign.Datetime),
-          }))
-        )
-      ).filter(Boolean); // undefined 제거
-
-      console.log("allCampaigns >>", allCampaigns);
-
-      const allCampaigns2 = data?.Payment?.Monthly?.flatMap((month: any, index: number) =>
-        month?.App?.flatMap((app: any) =>
-        ({
-          Revenue: app.Revenue,
-          month: formatToYearMonth(month.Datetime),
-        })
-        )
+useEffect(() => {
+  if (data) {
+    // 1. 모든 Campaign 데이터 병합
+    const allCampaigns = data?.Payment?.Monthly?.flatMap((month: any) =>
+      month?.App?.flatMap((app: any) =>
+        app?.Campaign?.map((campaign: GridColumn) => ({
+          month: formatToYearMonth(campaign.Datetime),
+          AppKey: app.AppKey,
+          AppName: app.AppName,
+          CampaignKey: campaign.CampaignKey,
+          CampaignName: campaign.CampaignName,
+          Commission: campaign.Commission,
+          Complete: campaign.Complete,
+          Revenue: campaign.Revenue,
+          Datetime: convertDotNetDate(campaign.Datetime),
+        }))
       )
-      console.log("allCampaigns2 >>", allCampaigns2);
+    ).filter(Boolean); // undefined 제거
 
-
-      if (Array.isArray(allCampaigns) && allCampaigns.length > 0) {
-
-        const newGridData = allCampaigns.map((item) => ({
-          month: item.month,
-          AppKey: item.AppKey,
-          AppName: item.AppName,
-          CampaignKey: item.CampaignKey,
-          CampaignName: item.CampaignName,
-          Commission: item.Commission,
-          Complete: item.Complete,
-          Revenue: item.Revenue,
-          Datetime: item.Datetime,
-        }));
-
-
-        setGridData(newGridData);
-      } else {
-        console.warn('Campaign 데이터가 올바르게 로드되지 않았습니다.');
-      }
-
-      if (Array.isArray(allCampaigns2) && allCampaigns2.length > 0) {
-
-        const newChartData = allCampaigns2.map((item) => (
-          item.Revenue
-        ));
-console.log("newChartData>>",newChartData);
-
-
-        setChartData(newChartData);
-      } else {
-        console.warn('Campaign 데이터가 올바르게 로드되지 않았습니다.');
-      }
+    // 2. Grid 데이터 설정
+    if (Array.isArray(allCampaigns) && allCampaigns.length > 0) {
+      const newGridData = allCampaigns.map((item) => ({
+        month: item.month,
+        AppKey: item.AppKey,
+        AppName: item.AppName,
+        CampaignKey: item.CampaignKey,
+        CampaignName: item.CampaignName,
+        Commission: item.Commission,
+        Complete: item.Complete,
+        Revenue: item.Revenue,
+        Datetime: item.Datetime,
+      }));
+      setGridData(newGridData);
+    } else {
+      console.warn('Campaign 데이터가 올바르게 로드되지 않았습니다.');
     }
-  }, [data]);
+
+    // 3. 차트 데이터 생성: 월별 Revenue 합계
+    const monthlyRevenue: { [key: string]: number } = {};
+    data?.Payment?.Monthly?.forEach((month: any) => {
+      const monthKey = formatToYearMonth(month.Datetime);
+      const totalRevenue = month?.App?.reduce((acc: number, app: any) => acc + (app.Revenue || 0), 0);
+      monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + totalRevenue;
+    });
+
+    const newChartData = [
+      {
+        name: '월별 Revenue',
+        data: Object.entries(monthlyRevenue).map(([key, value]) => value),
+      },
+    ];
+
+    setChartData(newChartData);
+  }
+}, [data]);
 
   const handleYearChange = (e: SelectChangeEvent<number>) => {
     const year = Number(e.target.value);
