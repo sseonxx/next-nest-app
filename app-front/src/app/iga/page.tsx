@@ -2,7 +2,7 @@
 import { getDemoData } from '@/api/dataFetchApi';
 import CustomPieChart from '@/component/CustomPieChart';
 import React, { useEffect, useState } from 'react';
-import { Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { Select, MenuItem, FormControl, InputLabel, SelectChangeEvent } from '@mui/material';
 
 type CampaignItem = {
   CampaignName: string;
@@ -64,6 +64,19 @@ const Page = (props: Props) => {
     ],
   };
 
+  const handleYearChange = (e: SelectChangeEvent<number>) => {
+    const year = Number(e.target.value);
+    setSelected({ year, month: undefined });
+  }
+
+  const handleMonthChange = (e: SelectChangeEvent<number>) => {
+    const month = e.target.value === '' ? undefined : Number(e.target.value);
+    setSelected((prev) => ({
+      ...prev,
+      month,
+    }));
+  };
+
   return (
     <div>
       <h2>📊 캠페인별 수익 비용</h2>
@@ -73,12 +86,7 @@ const Page = (props: Props) => {
           <InputLabel>연도 선택</InputLabel>
           <Select
             value={selected.year}
-            onChange={(e) =>
-              setSelected((prev) => ({
-                ...prev,
-                year: Number(e.target.value)
-              }))
-            }
+            onChange={handleYearChange}
             label="연도 선택"
           >
             {[2018, 2019, 2020, 2021].map((year) => (
@@ -91,12 +99,7 @@ const Page = (props: Props) => {
           <InputLabel>월 선택 (선택 사항)</InputLabel>
           <Select
             value={selected.month || ''}
-            onChange={(e) =>
-              setSelected((prev) => ({
-                ...prev,
-                month: e.target.value ? Number(e.target.value) : undefined
-              }))
-            }
+            onChange={handleMonthChange}
             label="월 선택 (선택 사항)"
           >
             <MenuItem value="">전체</MenuItem>
