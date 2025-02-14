@@ -8,6 +8,7 @@ import {
   ColumnDef,
 } from "@tanstack/react-table";
 
+// 원본 데이터
 const data = [
   { month: "2024.1", cost: 1000, category: "식비" },
   { month: "2024.1", cost: 2000, category: "쇼핑" },
@@ -15,8 +16,24 @@ const data = [
   { month: "2024.2", cost: 4000, category: "쇼핑" },
 ];
 
+// month별로 cost 합산
+const groupedData = Object.values(
+  data.reduce((acc: Record<string, { month: string; costTotal: number; details: typeof data }>, item) => {
+    if (!acc[item.month]) {
+      acc[item.month] = {
+        month: item.month,
+        costTotal: 0,
+        details: [],
+      };
+    }
+    acc[item.month].costTotal += item.cost;
+    acc[item.month].details.push(item);
+    return acc;
+  }, {})
+);
+
 // 🌟 메인 컬럼 정의
-const columns: ColumnDef<typeof data[0]>[] = [
+const columns: ColumnDef<typeof groupedData[0]>[] = [
   {
     accessorKey: "month",
     header: "Month",
@@ -29,13 +46,12 @@ const columns: ColumnDef<typeof data[0]>[] = [
       </span>
     ),
   },
-  { accessorKey: "cost", header: "Total Cost" },
-  { accessorKey: "category", header: "Category" },
+  { accessorKey: "costTotal", header: "Total Cost" },
 ];
 
 export default function CustomGrid2() {
   const table = useReactTable({
-    data,
+    data: groupedData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
@@ -56,7 +72,7 @@ export default function CustomGrid2() {
         <tbody>
           {table.getRowModel().rows.map((row) => (
             <React.Fragment key={row.id}>
-              {/* 메인 행 */}
+              {/* 메인 행 (월별 cost 합계) */}
               <tr>
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id}>{String(cell.renderValue())}</td>
@@ -70,9 +86,11 @@ export default function CustomGrid2() {
                     <div style={{ padding: "10px", backgroundColor: "#f0f0f0" }}>
                       <strong>상세 내역:</strong>
                       <ul>
-                        <li>월: {row.original.month}</li>
-                        <li>비용: {row.original.cost} 원</li>
-                        <li>카테고리: {row.original.category}</li>
+                        {row.original.details.map((detail, index) => (
+                          <li key={index}>
+                            {detail.category}: {detail.cost} 원
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   </td>
@@ -80,7 +98,7 @@ export default function CustomGrid2() {
               )}
             </React.Fragment>
           ))}
-        </tbody>c
+        </tbody>
       </table>
     </div>
   );
