@@ -19,7 +19,8 @@ const Page = (props: Props) => {
   const options: Highcharts.Options = useMemo(
     () => ({
       chart: {
-        type: 'column'
+        type: 'column',
+        width: 1100,  
       },
       title: {
         text: '차트'
@@ -163,12 +164,18 @@ const Page = (props: Props) => {
         console.log("apps>>>", apps);
 
         setCategories(apps);
-        const series = [
-          {
-            name: 'App별 Revenue',
-            data: apps.map((app) => appRevenue[app]),
-          },
-        ];
+        // const series = [
+        //   {
+        //     name: 'App별 Revenue',
+        //     data: apps.map((app) => appRevenue[app]),
+        //   },
+        // ];
+        const series = Object.entries(appRevenue).map(([name, value]) => ({
+          name,
+          data: [value]
+        }))
+
+        
         setChartData(series);
       } else {
         const monthlyRevenue: { [key: string]: number } = {};
@@ -177,8 +184,8 @@ const Page = (props: Props) => {
           const totalRevenue = month?.App?.reduce((acc: number, app: any) => acc + (app.Revenue || 0), 0);
           monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + totalRevenue;
         });
-        
-        
+
+
         setCategories(Array.from({ length: 12 }, (_, i) => `${i + 1}월`));
 
         const newChartData = [
