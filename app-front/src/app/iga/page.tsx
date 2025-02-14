@@ -1,6 +1,7 @@
 "use client"
 import { getDemoData } from '@/api/dataFetchApi';
 import CustomPieChart from '@/component/CustomPieChart'
+import { InputLabel, MenuItem, Select } from '@mui/material';
 import React, { useEffect, useState } from 'react'
 
 type Props = {}
@@ -35,8 +36,10 @@ const Page = (props: Props) => {
   }
 
   useEffect(() => {
+    console.log("selected >>", selected);
+
     fetchData();
-  }, [])
+  }, [selected])
 
   useEffect(() => {
     const campaigns = data?.Payment?.Monthly?.[0]?.App?.[0]?.Campaign;
@@ -79,6 +82,40 @@ const Page = (props: Props) => {
       <div>
 
         <h2>캠페인별 수익 비용</h2>
+        <InputLabel>연도 선택</InputLabel>
+        <Select
+          value={selected?.year || ''}
+          onChange={(e) =>
+            setSelected((prev) => ({
+              ...prev,
+              year: Number(e.target.value),
+            }))
+          }
+          label="연도 선택"
+        >
+          {
+            availableYear.map((year) => (
+              <MenuItem key={year} value={year}>{year}</MenuItem>
+            ))
+          }
+        </Select>
+        <InputLabel>월 선택</InputLabel>
+        <Select
+          value={selected.month || ''}
+          onChange={(e) =>
+            setSelected((prev) => ({
+              ...prev,
+              month: e.target.value ? Number(e.target.value) : undefined
+            }))
+          }
+          label="월 선택 (선택 사항)"
+        >
+          <MenuItem value="">전체</MenuItem>
+          {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+            <MenuItem key={month} value={month}>{month}월</MenuItem>
+          ))}
+        </Select>
+
 
         <CustomPieChart options={options} />
 
