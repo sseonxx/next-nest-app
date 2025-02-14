@@ -11,46 +11,44 @@ type Props = {}
 
 const Page = (props: Props) => {
   const [data, setData] = useState<any>(null);
+  const [categories, setCategories] = useState<string[]>([]);
   const [chartData, setChartData] = useState<{ name: string; data: number[] }[]>([]);
   const [gridData, setGridData] = useState<GridColumn[]>([]);
   const [selected, setSelected] = useState<{ year: number; month?: number }>({ year: 2021 });
 
-  const options: Highcharts.Options = {
-    chart: {
-      type: 'column'
-    },
-    title: {
-      text: 'Corn vs wheat estimated production for 2023'
-    },
-    subtitle: {
-      text:
-        'Source: <a target="_blank" ' +
-        'href="https://www.indexmundi.com/agriculture/?commodity=corn">indexmundi</a>'
-    },
-    xAxis: {
-      categories: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
-      crosshair: true,
-      accessibility: {
-        description: 'Countries'
-      }
-    },
-    yAxis: {
-      min: 0,
+  const options: Highcharts.Options = useMemo(
+    () => ({
+      chart: {
+        type: 'column'
+      },
       title: {
-        text: '1000 metric tons (MT)'
-      }
-    },
-    tooltip: {
-      valueSuffix: ' (1000 MT)'
-    },
-    plotOptions: {
-      column: {
-        pointPadding: 0.2,
-        borderWidth: 0
-      }
-    },
-    series: chartData,
-  }
+        text: 'Corn vs wheat estimated production for 2023'
+      },
+      subtitle: {
+        text:
+          'Source: <a target="_blank" ' +
+          'href="https://www.indexmundi.com/agriculture/?commodity=corn">indexmundi</a>'
+      },
+      xAxis: {
+        categories: categories,
+        title: { text: selected.month ? 'App Name' : 'Month' },
+      },
+      yAxis: {
+        min: 0,
+        title: { text: 'Revenue (원)' },
+      },
+      tooltip: { valueSuffix: '원' },
+      plotOptions: {
+        column: {
+          pointPadding: 0.2,
+          borderWidth: 0
+        }
+      },
+      series: chartData,
+    }),
+    [chartData, categories, selected.month]
+  );
+
 
   const columns: MRT_ColumnDef<GridColumn>[] = [
     {
@@ -109,61 +107,83 @@ const Page = (props: Props) => {
     fetchData();
   }, [selected]);
 
-useEffect(() => {
-  if (data) {
-    // 1. 모든 Campaign 데이터 병합
-    const allCampaigns = data?.Payment?.Monthly?.flatMap((month: any) =>
-      month?.App?.flatMap((app: any) =>
-        app?.Campaign?.map((campaign: GridColumn) => ({
-          month: formatToYearMonth(campaign.Datetime),
-          AppKey: app.AppKey,
-          AppName: app.AppName,
-          CampaignKey: campaign.CampaignKey,
-          CampaignName: campaign.CampaignName,
-          Commission: campaign.Commission,
-          Complete: campaign.Complete,
-          Revenue: campaign.Revenue,
-          Datetime: convertDotNetDate(campaign.Datetime),
-        }))
-      )
-    ).filter(Boolean); // undefined 제거
+  useEffect(() => {
+    if (data) {
+      // 1. 모든 Campaign 데이터 병합
+      const allCampaigns = data?.Payment?.Monthly?.flatMap((month: any) =>
+        month?.App?.flatMap((app: any) =>
+          app?.Campaign?.map((campaign: GridColumn) => ({
+            month: formatToYearMonth(campaign.Datetime),
+            AppKey: app.AppKey,
+            AppName: app.AppName,
+            CampaignKey: campaign.CampaignKey,
+            CampaignName: campaign.CampaignName,
+            Commission: campaign.Commission,
+            Complete: campaign.Complete,
+            Revenue: campaign.Revenue,
+            Datetime: convertDotNetDate(campaign.Datetime),
+          }))
+        )
+      ).filter(Boolean); // undefined 제거
 
-    // 2. Grid 데이터 설정
-    if (Array.isArray(allCampaigns) && allCampaigns.length > 0) {
-      const newGridData = allCampaigns.map((item) => ({
-        month: item.month,
-        AppKey: item.AppKey,
-        AppName: item.AppName,
-        CampaignKey: item.CampaignKey,
-        CampaignName: item.CampaignName,
-        Commission: item.Commission,
-        Complete: item.Complete,
-        Revenue: item.Revenue,
-        Datetime: item.Datetime,
-      }));
-      setGridData(newGridData);
-    } else {
-      console.warn('Campaign 데이터가 올바르게 로드되지 않았습니다.');
+      // 2. Grid 데이터 설정
+      if (Array.isArray(allCampaigns) && allCampaigns.length > 0) {
+        const newGridData = allCampaigns.map((item) => ({
+          month: item.month,
+          AppKey: item.AppKey,
+          AppName: item.AppName,
+          CampaignKey: item.CampaignKey,
+          CampaignName: item.CampaignName,
+          Commission: item.Commission,
+          Complete: item.Complete,
+          Revenue: item.Revenue,
+          Datetime: item.Datetime,
+        }));
+        setGridData(newGridData);
+      } else {
+        console.warn('Campaign 데이터가 올바르게 로드되지 않았습니다.');
+      }
+
+      // 3. 차트 데이터 생성: 월별 Revenue 합계
+      if (selected.month) {
+        const appRevenue: Record<string, number> = {};
+        data?.Payment?.Monthly?.forEach((month: any) => {
+          if (formatToYearMonth(month.Datetime) === `${selected.year}-${String(selected.month).padStart(2, '0')}`) {
+            month?.App?.forEach((app: any) => {
+              appRevenue[app.AppName] = (appRevenue[app.AppName] || 0) + app.Revenue;
+            });
+          }
+        });
+
+        const apps = Object.keys(appRevenue);
+        setCategories(apps);
+        const series = [
+          {
+            name: 'App별 Revenue',
+            data: apps.map((app) => appRevenue[app]),
+          },
+        ];
+        setChartData(series);
+      } else {
+        const monthlyRevenue: { [key: string]: number } = {};
+        data?.Payment?.Monthly?.forEach((month: any) => {
+          const monthKey = formatToYearMonth(month.Datetime);
+          const totalRevenue = month?.App?.reduce((acc: number, app: any) => acc + (app.Revenue || 0), 0);
+          monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + totalRevenue;
+        });
+
+        const newChartData = [
+          {
+            name: '월별 Revenue',
+            data: Object.entries(monthlyRevenue).map(([key, value]) => value),
+          },
+        ];
+
+        setChartData(newChartData);
+      }
+
     }
-
-    // 3. 차트 데이터 생성: 월별 Revenue 합계
-    const monthlyRevenue: { [key: string]: number } = {};
-    data?.Payment?.Monthly?.forEach((month: any) => {
-      const monthKey = formatToYearMonth(month.Datetime);
-      const totalRevenue = month?.App?.reduce((acc: number, app: any) => acc + (app.Revenue || 0), 0);
-      monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + totalRevenue;
-    });
-
-    const newChartData = [
-      {
-        name: '월별 Revenue',
-        data: Object.entries(monthlyRevenue).map(([key, value]) => value),
-      },
-    ];
-
-    setChartData(newChartData);
-  }
-}, [data]);
+  }, [data]);
 
   const handleYearChange = (e: SelectChangeEvent<number>) => {
     const year = Number(e.target.value);
