@@ -3,21 +3,66 @@
 import { getDemoData } from '@/api/dataFetchApi';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Select, MenuItem, FormControl, InputLabel, SelectChangeEvent } from '@mui/material';
-import { convertDotNetDate } from '@/common/format';
+import { convertDotNetDate, formatToYearMonth } from '@/common/format';
 import { GridColumn } from '@/type/GridColumn';
 import { MaterialReactTable, MRT_ColumnDef } from 'material-react-table';
+import CustomPieChart from '@/component/CustomPieChart';
 type Props = {}
 
 const Page = (props: Props) => {
   const [data, setData] = useState<any>(null);
+  const [chartData, setChartData] = useState<{ name: string; data: number[] }[]>([]);
   const [gridData, setGridData] = useState<GridColumn[]>([]);
   const [selected, setSelected] = useState<{ year: number; month?: number }>({ year: 2021 });
 
+  const options: Highcharts.Options = {
+    chart: {
+      type: 'column'
+    },
+    title: {
+      text: 'Corn vs wheat estimated production for 2023'
+    },
+    subtitle: {
+      text:
+        'Source: <a target="_blank" ' +
+        'href="https://www.indexmundi.com/agriculture/?commodity=corn">indexmundi</a>'
+    },
+    xAxis: {
+      categories: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+      crosshair: true,
+      accessibility: {
+        description: 'Countries'
+      }
+    },
+    yAxis: {
+      min: 0,
+      title: {
+        text: '1000 metric tons (MT)'
+      }
+    },
+    tooltip: {
+      valueSuffix: ' (1000 MT)'
+    },
+    plotOptions: {
+      column: {
+        pointPadding: 0.2,
+        borderWidth: 0
+      }
+    },
+    series: chartData,
+  }
 
   const columns: MRT_ColumnDef<GridColumn>[] = [
     {
+      accessorKey: 'month',
+      header: '',
+      enableGrouping: true,
+      maxSize: 100,
+    },
+    {
       accessorKey: 'AppName',
       header: '앱명',
+      enableGrouping: true,
     },
     {
       accessorKey: 'CampaignName',
@@ -26,18 +71,19 @@ const Page = (props: Props) => {
     {
       accessorKey: 'Commission',
       header: '수수료',
+      AggregatedCell: ({ cell }) => `Total Revenue: ${cell.getValue<number>()}`
     },
     {
       accessorKey: 'Complete',
       header: '캠페인 완료 수',
+      AggregatedCell: ({ cell }) => `Total Revenue: ${cell.getValue<number>()}`,
+      maxSize: 100,
     },
     {
       accessorKey: 'Revenue',
       header: '월 수익',
-    },
-    {
-      accessorKey: 'Datetime',
-      header: '시작날짜',
+      aggregationFn: 'sum',
+      AggregatedCell: ({ cell }) => `Total Revenue: ${cell.getValue<number>()}`
     },
   ]
 
@@ -66,9 +112,10 @@ const Page = (props: Props) => {
   useEffect(() => {
     if (data) {
       // 모든 Monthly 배열의 Campaign 데이터 병합
-      const allCampaigns = data?.Payment?.Monthly?.flatMap((month: any) =>
+      const allCampaigns = data?.Payment?.Monthly?.flatMap((month: any, index: number) =>
         month?.App?.flatMap((app: any) =>
           app?.Campaign?.map((campaign: GridColumn) => ({
+            month: formatToYearMonth(campaign.Datetime),
             AppKey: app.AppKey,
             AppName: app.AppName,
             CampaignKey: campaign.CampaignKey,
@@ -83,10 +130,21 @@ const Page = (props: Props) => {
 
       console.log("allCampaigns >>", allCampaigns);
 
+      const allCampaigns2 = data?.Payment?.Monthly?.flatMap((month: any, index: number) =>
+        month?.App?.flatMap((app: any) =>
+        ({
+          Revenue: app.Revenue,
+          month: formatToYearMonth(month.Datetime),
+        })
+        )
+      )
+      console.log("allCampaigns2 >>", allCampaigns2);
+
 
       if (Array.isArray(allCampaigns) && allCampaigns.length > 0) {
 
         const newGridData = allCampaigns.map((item) => ({
+          month: item.month,
           AppKey: item.AppKey,
           AppName: item.AppName,
           CampaignKey: item.CampaignKey,
@@ -100,7 +158,20 @@ const Page = (props: Props) => {
 
         setGridData(newGridData);
       } else {
-        console.warn('⚠️ Campaign 데이터가 올바르게 로드되지 않았습니다.');
+        console.warn('Campaign 데이터가 올바르게 로드되지 않았습니다.');
+      }
+
+      if (Array.isArray(allCampaigns2) && allCampaigns2.length > 0) {
+
+        const newChartData = allCampaigns2.map((item) => (
+          item.Revenue
+        ));
+console.log("newChartData>>",newChartData);
+
+
+        setChartData(newChartData);
+      } else {
+        console.warn('Campaign 데이터가 올바르게 로드되지 않았습니다.');
       }
     }
   }, [data]);
@@ -149,7 +220,24 @@ const Page = (props: Props) => {
           </Select>
         </FormControl>
       </div>
-      <MaterialReactTable columns={columns} data={gridData} enableColumnFilters />
+      <div>
+        <CustomPieChart options={options} />
+      </div>
+      <div style={{ marginBottom: '20px', display: 'flex', gap: '20px', margin: '20px' }}>
+        <MaterialReactTable
+          columns={columns}
+          data={gridData}
+          enableColumnFilters
+          enableGrouping // 그룹핑 활성화
+          enablePagination={false}
+          enableRowVirtualization={true}
+          muiTableContainerProps={{ sx: { minHeight: '800px', maxHeight: '800px' } }} // 스크롤 높이 제한
+          initialState={{
+            grouping: ['month', 'AppName'], // 초기에 'state' 컬럼으로 그룹화
+            expanded: false, // 그룹을 기본적으로 펼침
+          }}
+        />
+      </div>
     </div>
   )
 }

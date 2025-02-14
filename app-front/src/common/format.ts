@@ -11,3 +11,9 @@ export function convertDotNetDate(dotNetDate: string) {
     second: '2-digit',
   });
 }
+
+export function formatToYearMonth(dotNetDate: string): string {
+  const dateStr = convertDotNetDate(dotNetDate);
+  const cleanedDate = dateStr.replace(/\s/g, '');
+  return cleanedDate.substring(0, 7);
+}

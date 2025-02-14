@@ -1,5 +1,5 @@
 export type GridColumn = {
-  // CampaignKey
+  month: string;
   AppKey: number;
   AppName: string;
   CampaignKey: string;
