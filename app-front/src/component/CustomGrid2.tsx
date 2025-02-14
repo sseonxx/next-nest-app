@@ -1,24 +1,20 @@
-"use client";
+"use client"
 
-import React from "react";
-import {
-  useReactTable,
-  getCoreRowModel,
-  getExpandedRowModel,
-  ColumnDef,
-} from "@tanstack/react-table";
+import React, { useState } from 'react';
+import DataGrid, { Column, Grouping, GroupPanel, Paging } from 'devextreme-react/data-grid';
+import 'devextreme/dist/css/dx.light.css';
 
 // 원본 데이터
 const data = [
-  { month: "2024.1", cost: 1000, category: "식비" },
-  { month: "2024.1", cost: 2000, category: "쇼핑" },
-  { month: "2024.2", cost: 3000, category: "교통비" },
-  { month: "2024.2", cost: 4000, category: "쇼핑" },
+  { month: '2024.1', cost: 1000, category: '식비' },
+  { month: '2024.1', cost: 2000, category: '쇼핑' },
+  { month: '2024.2', cost: 3000, category: '교통비' },
+  { month: '2024.2', cost: 4000, category: '쇼핑' },
 ];
 
-// month별로 cost 합산
+// month별 cost 합산 및 상세 데이터 그룹화
 const groupedData = Object.values(
-  data.reduce((acc: Record<string, { month: string; costTotal: number; details: typeof data }>, item) => {
+  data.reduce((acc, item) => {
     if (!acc[item.month]) {
       acc[item.month] = {
         month: item.month,
@@ -32,67 +28,50 @@ const groupedData = Object.values(
   }, {})
 );
 
-// 🌟 메인 컬럼 정의
-const columns: ColumnDef<typeof groupedData[0]>[] = [
-  {
-    accessorKey: "month",
-    header: "Month",
-    cell: ({ row, getValue }) => (
-      <span
-        style={{ cursor: "pointer", color: "blue" }}
-        onClick={() => row.toggleExpanded()}
-      >
-        {row.getIsExpanded() ? "▼" : "▶"} {String(getValue())}
-      </span>
-    ),
-  },
-  { accessorKey: "costTotal", header: "Total Cost" },
-];
+export default function CustomGrid() {
+  const [expandedRows, setExpandedRows] = useState([]);
 
-export default function CustomGrid2() {
-  const table = useReactTable({
-    data: groupedData,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
-  });
+  // 행 확장/축소 토글
+  const toggleRow = (month) => {
+    setExpandedRows((prev) =>
+      prev.includes(month) ? prev.filter((m) => m !== month) : [...prev, month]
+    );
+  };
 
   return (
-    <div style={{ margin: "20px" }}>
-      <table border={1} style={{ width: "100%", textAlign: "left" }}>
+    <div style={{ margin: '20px' }}>
+      <table border={1} style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
         <thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th key={header.id}>{String(header.column.columnDef.header)}</th>
-              ))}
-            </tr>
-          ))}
+          <tr style={{ backgroundColor: '#eee' }}>
+            <th style={{ padding: '10px' }}>Month</th>
+            <th style={{ padding: '10px' }}>Total Cost</th>
+          </tr>
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <React.Fragment key={row.id}>
-              {/* 메인 행 (월별 cost 합계) */}
+          {groupedData.map((group) => (
+            <React.Fragment key={group.month}>
               <tr>
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id}>{String(cell.renderValue())}</td>
-                ))}
+                <td
+                  style={{ cursor: 'pointer', color: 'blue', fontWeight: 'bold', padding: '10px' }}
+                  onClick={() => toggleRow(group.month)}
+                >
+                  {expandedRows.includes(group.month) ? '▼' : '▶'} {group.month}
+                </td>
+                <td style={{ padding: '10px' }}>{group.costTotal.toLocaleString()} 원</td>
               </tr>
-
-              {/* 하위 상세 행 */}
-              {row.getIsExpanded() && (
+              {expandedRows.includes(group.month) && (
                 <tr>
-                  <td colSpan={columns.length}>
-                    <div style={{ padding: "10px", backgroundColor: "#f0f0f0" }}>
-                      <strong>상세 내역:</strong>
-                      <ul>
-                        {row.original.details.map((detail, index) => (
-                          <li key={index}>
-                            {detail.category}: {detail.cost} 원
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                  <td colSpan={2} style={{ backgroundColor: '#f0f0f0' }}>
+
+                    <DataGrid
+                      dataSource={group.details}
+                      showBorders={true}
+                      columnAutoWidth={true}
+                      height={200}
+                    >
+                      <Column dataField="category" caption="Category" />
+                      <Column dataField="cost" caption="Cost" dataType="number" />
+                    </DataGrid>
                   </td>
                 </tr>
               )}
