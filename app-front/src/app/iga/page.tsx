@@ -5,6 +5,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Select, MenuItem, FormControl, InputLabel, SelectChangeEvent } from '@mui/material';
 import CustomGrid4 from '@/component/CustomGrid4';
 import { MaterialReactTable, MRT_ColumnDef } from 'material-react-table';
+import { convertDotNetDate } from '@/common/format';
 
 type CampaignItem = {
   CampaignName: string;
@@ -17,7 +18,7 @@ type GridColumn = {
   Commission: number; // 수수료
   Complete: number; //캠페인 완료수
   Revenue: number; // 해당월 수익
-  Datetime: string //
+  Datetime: string; //
 }
 
 
@@ -83,7 +84,7 @@ const Page = (props: Props) => {
           Commission: item.Commission,
           Complete: item.Complete,
           Revenue: item.Revenue,
-          Datetime: item.Datetime
+          Datetime: convertDotNetDate(item.Datetime)
 
         }));
         setChartData(newChartData);
