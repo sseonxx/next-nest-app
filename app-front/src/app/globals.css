@@ -1,0 +1,133 @@
+/* globals.css */
+
+/* Reset some default styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font-geist-sans), sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background-color: #f5f5f5;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  /* border: 1px solid black; */
+  display: flex;
+  padding: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #212529;
+  min-height: 66px;
+}
+header .logo {
+  height: 50px;
+  width: auto;
+  margin-right: 1rem;
+}
+
+header ul {
+  list-style: none;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
+  gap: 1rem;
+}
+
+
+header ul li a {
+  font-size: 16px;
+  text-decoration: none;
+  color: rgba(233, 236, 239, 0.8);
+  font-weight: 800;
+  transition: color 0.3s;
+}
+
+header ul li a:hover {
+  color: #ffffff;
+}
+
+main {
+  flex: 1;
+  padding: 2rem;
+  /* border: 1px solid black; */
+  background-color: #ffffff;
+}
+
+footer {
+  
+  /* border: 1px solid black; */
+  background-color: #212529;  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+/* Utility classes */
+.text-center {
+  text-align: center;
+}
+.mt-2 {
+  margin-top: 2rem;
+}
+.mb-2 {
+  margin-bottom: 2rem;
+}
+.p-4 {
+  padding: 1rem;
+}
+.border {
+  /* border: 1px solid #ccc; */
+}
+.rounded {
+  border-radius: 0.5rem;
+}
+.shadow {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Font styles */
+.mono {
+  font-family: var(--font-geist-mono), monospace;
+}
+
+@media (max-width: 768px) {
+  header ul {
+    flex-direction: column;
+  }
+}
+
+.pt-3, .footer__copyright, .py-3 {padding-top: 1rem !important;}
+
+.footer__nav ul.list-nav { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: horizontal; -webkit-box-direction: normal; -ms-flex-direction: row; flex-direction: row; -webkit-box-pack: start; -ms-flex-pack: start; justify-content: flex-start; }
+.footer__nav ul.list-nav > li > a { display: block; font-weight: bold; font-size: 1.125rem; padding: 0.5rem 0; color: #fff; }
+.footer__nav ul.list-nav > li > a.disabled { color: #fff; opacity: 0.4; }
+.footer__nav ul.list-nav > li > a.disabled[data-disabled] { position: relative; }
+.footer__nav ul.list-nav > li > a.disabled[data-disabled]:after { content: attr(data-disabled); position: absolute; top: -0.5rem; left: 0; display: block; font-size: 0.5rem; color: #343a40; padding: 0 6px; background-color: #fff; border-radius: 4px; }
+@media (max-width: 1199.98px) { .footer__nav ul.list-nav > li > a.disabled[data-disabled]:after { position: relative; display: inline-block; top: auto; left: auto; } }
+.footer__nav ul.list-nav > li > ul > li > a { display: block; padding: 0.25rem 0; font-size: 0.875rem; }
+.footer__nav ul.list-nav > li > ul > li > a:link, .footer__nav ul.list-nav > li > ul > li > a:active, .footer__nav ul.list-nav > li > ul > li > a:visited { color: #fff; opacity: 0.5; }
+.footer__nav ul.list-nav > li > ul > li > a:hover { opacity: 1; }
+.footer__nav .fb-cta { display: block; height: 100%; background-color: #1877f2; padding: 1rem; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-align: center; -ms-flex-align: center; align-items: center; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; }
+.footer__nav .fb-cta__inner { text-align: center; color: #fff; }
+.footer__nav .fb-cta__inner img { width: 2.5rem; }
+.footer__nav .fb-cta__inner small { opacity: 0.6; letter-spacing: -0.025rem; }
+
+.footer__copyright { border-top: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.875rem; color: #fff; }
+.footer__copyright .container__inner .address { opacity: 0.5; }
+.footer__copyright .container__inner .copyright { opacity: 0.3; }
+@media (min-width: 768px) { .footer__copyright .container__inner { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-align: center; -ms-flex-align: center; align-items: center; }
+  .footer__copyright .container__inner .address { margin-left: auto; }
+  .footer__copyright .container__inner .address.information-section:after { content: '|'; margin: 0 8px; }
+  .footer__copyright .container__inner .copyright { margin-left: 0.75rem; } }

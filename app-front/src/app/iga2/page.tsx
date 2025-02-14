@@ -7,6 +7,7 @@ import { convertDotNetDate, formatToYearMonth } from '@/common/format';
 import { GridColumn } from '@/type/GridColumn';
 import { MaterialReactTable, MRT_ColumnDef } from 'material-react-table';
 import CustomPieChart from '@/component/CustomPieChart';
+
 type Props = {}
 
 const Page = (props: Props) => {
@@ -15,20 +16,15 @@ const Page = (props: Props) => {
   const [chartData, setChartData] = useState<{ name: string; data: number[] }[]>([]);
   const [gridData, setGridData] = useState<GridColumn[]>([]);
   const [selected, setSelected] = useState<{ year: number; month?: number }>({ year: 2021 });
-
+  // 하이차트 옵션
   const options: Highcharts.Options = useMemo(
     () => ({
       chart: {
         type: 'column',
-        width: 1100,  
+        // width: 1100,
       },
       title: {
-        text: '차트'
-      },
-      subtitle: {
-        text:
-          'Source: <a target="_blank" ' +
-          'href="https://www.indexmundi.com/agriculture/?commodity=corn">indexmundi</a>'
+        text: ''
       },
       xAxis: {
         categories: categories,
@@ -52,13 +48,13 @@ const Page = (props: Props) => {
     [chartData, categories, selected.month]
   );
 
-
+  //그리드 컬럼 정보
   const columns: MRT_ColumnDef<GridColumn>[] = [
     {
       accessorKey: 'month',
       header: '',
       enableGrouping: true,
-      maxSize: 100,
+      maxSize: 120,
     },
     {
       accessorKey: 'AppName',
@@ -72,24 +68,23 @@ const Page = (props: Props) => {
     {
       accessorKey: 'Commission',
       header: '수수료',
-      AggregatedCell: ({ cell }) => `Total Revenue: ${cell.getValue<number>()}`
+      AggregatedCell: ({ cell }) => `${cell.getValue<number>()}`
     },
     {
       accessorKey: 'Complete',
       header: '캠페인 완료 수',
-      AggregatedCell: ({ cell }) => `Total Revenue: ${cell.getValue<number>()}`,
+      AggregatedCell: ({ cell }) => `${cell.getValue<number>()}`,
       maxSize: 100,
     },
     {
       accessorKey: 'Revenue',
       header: '월 수익',
       aggregationFn: 'sum',
-      AggregatedCell: ({ cell }) => `Total Revenue: ${cell.getValue<number>()}`
+      AggregatedCell: ({ cell }) => `${cell.getValue<number>()}`
     },
   ]
 
-
-
+  // 데이터 불러오기
   const fetchData = async () => {
     try {
       const params = selected.month
@@ -127,7 +122,7 @@ const Page = (props: Props) => {
             Datetime: convertDotNetDate(campaign.Datetime),
           }))
         )
-      ).filter(Boolean); // undefined 제거
+      ).filter(Boolean);
 
       // 2. Grid 데이터 설정
       if (Array.isArray(allCampaigns) && allCampaigns.length > 0) {
@@ -158,24 +153,13 @@ const Page = (props: Props) => {
           });
 
         });
-
         const apps = Object.keys(appRevenue);
-        console.log("appRevenue>>>", appRevenue);
-        console.log("apps>>>", apps);
 
         setCategories(apps);
-        // const series = [
-        //   {
-        //     name: 'App별 Revenue',
-        //     data: apps.map((app) => appRevenue[app]),
-        //   },
-        // ];
         const series = Object.entries(appRevenue).map(([name, value]) => ({
           name,
           data: [value]
         }))
-
-        
         setChartData(series);
       } else {
         const monthlyRevenue: { [key: string]: number } = {};
@@ -184,20 +168,15 @@ const Page = (props: Props) => {
           const totalRevenue = month?.App?.reduce((acc: number, app: any) => acc + (app.Revenue || 0), 0);
           monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + totalRevenue;
         });
-
-
         setCategories(Array.from({ length: 12 }, (_, i) => `${i + 1}월`));
-
         const newChartData = [
           {
             name: '월별 Revenue',
             data: Object.entries(monthlyRevenue).map(([key, value]) => value),
           },
         ];
-
         setChartData(newChartData);
       }
-
     }
   }, [data]);
 
@@ -216,9 +195,9 @@ const Page = (props: Props) => {
 
   return (
     <div>
-      <h2>📊 월별 성과</h2>
-      <div style={{ marginBottom: '20px', display: 'flex', gap: '20px' }}>
-        <FormControl variant="outlined" style={{ minWidth: 120 }}>
+      <h2>월별 성과</h2>
+      <div style={{ margin: '20px', display: 'flex', gap: '20px' }}>
+        <FormControl variant="outlined" style={{ minWidth: 100 }} size='small'>
           <InputLabel>연도 선택</InputLabel>
           <Select
             value={selected.year}
@@ -230,15 +209,14 @@ const Page = (props: Props) => {
             ))}
           </Select>
         </FormControl>
-
-        <FormControl variant="outlined" style={{ minWidth: 120 }}>
-          <InputLabel>월 선택 (선택 사항)</InputLabel>
+        <FormControl variant="outlined" style={{ minWidth: 100 }} size='small'>
+          <InputLabel>월 선택</InputLabel>
           <Select
-            value={selected.month || ''}
+            value={selected.month ?? ''}
             onChange={handleMonthChange}
-            label="월 선택 (선택 사항)"
+            label="월 선택"
           >
-            <MenuItem value="">전체</MenuItem>
+            <MenuItem value=""><em>전체</em></MenuItem>
             {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
               <MenuItem key={month} value={month}>{month}월</MenuItem>
             ))}
@@ -248,21 +226,35 @@ const Page = (props: Props) => {
       <div>
         <CustomPieChart options={options} />
       </div>
-      <div style={{ marginBottom: '20px', display: 'flex', gap: '20px', margin: '20px' }}>
+     
         <MaterialReactTable
           columns={columns}
           data={gridData}
-          // enableColumnFilters
           enableGrouping // 그룹핑 활성화
-          enablePagination={false}
-          enableRowVirtualization={true}
-          muiTableContainerProps={{ sx: { minHeight: '800px', maxHeight: '800px' } }} // 스크롤 높이 제한
+          enablePagination={false} // 페이지네이션 비활성화
+          enableRowVirtualization={true} //행 가상화 활성화화
+          muiTableContainerProps={{ sx: { minHeight: '500px', maxHeight: '500px' } }} // 스크롤 높이 제한
+          muiTableBodyRowProps={({ row }) => ({
+            sx: {
+              backgroundColor: row.depth === 0 ? '#e5f6fd' : // 최상위 그룹 행은 연한 파란색
+                               row.depth === 1 ? '#F4FBFE' : // 2차 그룹 행은 연한 초록색
+                               'white', // 일반 행은 흰색
+              color: row.depth === 0 ? 'black' : 'inherit',
+           
+            }
+          })}
+          muiTableBodyCellProps={{
+            sx: {
+              padding: '4px 8px', 
+              fontSize: '12px',
+            }
+          }}
           initialState={{
-            grouping: ['month', 'AppName'], // 초기에 'state' 컬럼으로 그룹화
-            expanded: false,
+            grouping: ['month', 'AppName'], 
+            // expanded: " ExpandedState",
           }}
         />
-      </div>
+
     </div>
   )
 }

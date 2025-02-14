@@ -1,9 +1,9 @@
 "use client"
+
 import { getDemoData } from '@/api/dataFetchApi';
 import CustomPieChart from '@/component/CustomPieChart';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Select, MenuItem, FormControl, InputLabel, SelectChangeEvent } from '@mui/material';
-import CustomGrid4 from '@/component/CustomGrid4';
 import { MaterialReactTable, MRT_ColumnDef } from 'material-react-table';
 import { convertDotNetDate } from '@/common/format';
 
@@ -13,14 +13,12 @@ type CampaignItem = {
 };
 
 type GridColumn = {
-  // CampaignKey
-  CampaignName: string; //캠페인명
+  CampaignName: string; // 캠페인명
   Commission: number; // 수수료
-  Complete: number; //캠페인 완료수
+  Complete: number; // 캠페인 완료수
   Revenue: number; // 해당월 수익
-  Datetime: string; //
+  Datetime: string; // 시작날짜짜
 }
-
 
 type Props = {};
 
@@ -29,7 +27,19 @@ const Page = (props: Props) => {
   const [chartData, setChartData] = useState<{ name: string; y: number }[]>([]);
   const [gridData, setGridData] = useState<GridColumn[]>([]);
   const [selected, setSelected] = useState<{ year: number; month?: number }>({ year: 2021 });
-
+  // 하이차트 옵션
+  const options: Highcharts.Options = {
+    chart: { type: "pie" },
+    title: { text: "캠페인별 수익 비용" },
+    series: [
+      {
+        name: "수익",
+        type: "pie",
+        data: chartData,
+      },
+    ],
+  };
+  //그리드 컬럼 정보
   const columns: MRT_ColumnDef<GridColumn>[] = [
     {
       accessorKey: 'CampaignName',
@@ -45,7 +55,7 @@ const Page = (props: Props) => {
     },
     {
       accessorKey: 'Revenue',
-      header: '월 수익익',
+      header: '월 수익',
     },
     {
       accessorKey: 'Datetime',
@@ -53,7 +63,7 @@ const Page = (props: Props) => {
     },
   ]
 
-
+  // 데이터 불러오기
   const fetchData = async () => {
     try {
       const params = selected.month
@@ -61,8 +71,6 @@ const Page = (props: Props) => {
         : { search_year: selected.year };
 
       const response = await getDemoData(params);
-      console.log("response >>", response);
-
 
       setData(response.data);
     } catch (error: any) {
@@ -73,7 +81,7 @@ const Page = (props: Props) => {
   //  데이터 변경 시 차트 데이터 생성
   useEffect(() => {
     if (data) {
-      // 모든 Monthly 배열의 Campaign 데이터 병합
+      // 모든 Monthly 배열의 Campaign 데이터  병합
       const allCampaigns = data?.Payment?.Monthly?.flatMap((month: any) =>
         month?.App?.flatMap((app: any) =>
           app?.Campaign?.map((campaign: CampaignItem & GridColumn) => ({
@@ -102,30 +110,16 @@ const Page = (props: Props) => {
 
         setChartData(newChartData);
         setGridData(newGridData);
-        console.log('📊 Chart Data (전체 월 데이터 포함):', newChartData);
+
       } else {
-        console.warn('⚠️ Campaign 데이터가 올바르게 로드되지 않았습니다.');
+        console.warn('데이터 오류');
       }
     }
   }, [data]);
 
-  // 선택된 연도와 월이 변경될 때 데이터 다시 불러오기
   useEffect(() => {
     fetchData();
   }, [selected]);
-
-  // 📈 하이차트 옵션 구성
-  const options: Highcharts.Options = {
-    chart: { type: "pie" },
-    title: { text: "캠페인별 수익 비용" },
-    series: [
-      {
-        name: "수익",
-        type: "pie",
-        data: chartData,
-      },
-    ],
-  };
 
   const handleYearChange = (e: SelectChangeEvent<number>) => {
     const year = Number(e.target.value);
@@ -142,10 +136,9 @@ const Page = (props: Props) => {
 
   return (
     <div>
-      <h2>📊 캠페인별 수익 비용</h2>
-
-      <div style={{ marginBottom: '20px', display: 'flex', gap: '20px' }}>
-        <FormControl variant="outlined" style={{ minWidth: 120 }}>
+      <h2>캠페인별 수익 비용</h2>
+      <div style={{ margin: '20px', display: 'flex', gap: '20px' }}>
+        <FormControl variant="outlined" style={{ minWidth: 100 }} size='small'>
           <InputLabel>연도 선택</InputLabel>
           <Select
             value={selected.year}
@@ -157,15 +150,14 @@ const Page = (props: Props) => {
             ))}
           </Select>
         </FormControl>
-
-        <FormControl variant="outlined" style={{ minWidth: 120 }}>
-          <InputLabel>월 선택 (선택 사항)</InputLabel>
+        <FormControl variant="outlined" style={{ minWidth: 100 }} size='small'>
+          <InputLabel>월 선택</InputLabel>
           <Select
-            value={selected.month || ''}
+            value={selected.month ?? ''}
             onChange={handleMonthChange}
-            label="월 선택 (선택 사항)"
+            label="월 선택"
           >
-            <MenuItem value="">전체</MenuItem>
+            <MenuItem value=""><em>전체</em></MenuItem>
             {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
               <MenuItem key={month} value={month}>{month}월</MenuItem>
             ))}
@@ -174,7 +166,17 @@ const Page = (props: Props) => {
       </div>
       <CustomPieChart options={options} />
 
-      <MaterialReactTable columns={columns} data={gridData} enableColumnFilters />
+      <MaterialReactTable
+        columns={columns}
+        data={gridData}
+        enableColumnFilters 
+        muiTableBodyCellProps={{
+          sx: {
+            padding: '4px 8px', 
+            fontSize: '12px', 
+          }
+        }}
+        />
 
     </div>
   );

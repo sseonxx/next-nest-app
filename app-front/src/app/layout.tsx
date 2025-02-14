@@ -4,6 +4,7 @@ import "./globals.css";
 import Link from "next/link";
 
 import React from "react";
+import Image from "next/image";
 
 /*
   root layout 컴포넌트
@@ -32,10 +33,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <header style={{  borderColor: "black", border: "solid" }}>
-          헤더입니다<br />
+        <header>
+          <Image
+            src="/navbar-brand.svg"
+            alt="Logo"
+            width={143}
+            height={40}
+            className="logo" />
           <ul>
-            <li>
+            {/* <li>
               <Link href={"/"}>index</Link>
             </li>
             <li>
@@ -52,7 +58,7 @@ export default function RootLayout({
             </li>
             <li>
               <Link href={"/assignment"}>Assignment Page</Link>
-            </li>
+            </li> */}
             <li>
               <Link href={"/iga"}>Data Assignment</Link>
             </li>
@@ -61,11 +67,34 @@ export default function RootLayout({
             </li>
           </ul>
         </header>
-        <main style={{ border: "solid" }}>
+        <main>
           {children}
         </main>
-        <footer style={{ height: "100px", border: "solid" }}>
-          푸터 입니다
+        <footer className="footer st-current">
+          <div className="footer__copyright">
+            <div className="container">
+              <div className="container__inner">
+                <div className="address information-section" style={{ marginLeft: "0.0rem", cursor: "pointer" }} >개인정보처리방침</div>
+                <div className="address" style={{ marginLeft: "0.0rem", cursor: "pointer" }} >저작권정책</div>
+                <div className="address">서울특별시 용산구 서빙고로 17, 24층, 25층, 26층 (한강로3가, 센트럴파크타워)</div>
+                <div className="copyright">© 2019. IGAWorks Inc. All rights reserved.</div>
+              </div>
+            </div>
+            <br />
+            <div className="container">
+              <div className="container__inner">
+                <div className="logo">
+                  <Image
+                    src="/igaw-gray.svg"
+                    alt="Logo"
+                    width={79}
+                    height={22}
+                    className="logo" />
+                </div>
+              </div>
+            </div>
+            <br />
+          </div>
         </footer>
       </body>
     </html>
