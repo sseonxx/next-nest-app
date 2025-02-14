@@ -73,25 +73,38 @@ const Page = (props: Props) => {
   //  데이터 변경 시 차트 데이터 생성
   useEffect(() => {
     if (data) {
-      const campaigns = data?.Payment?.Monthly?.[0]?.App?.[0]?.Campaign;
-      if (Array.isArray(campaigns)) {
-        const newChartData = campaigns.map((item: CampaignItem) => ({
+      // 모든 Monthly 배열의 Campaign 데이터 병합
+      const allCampaigns = data?.Payment?.Monthly?.flatMap((month: any) =>
+        month?.App?.flatMap((app: any) =>
+          app?.Campaign?.map((campaign: CampaignItem & GridColumn) => ({
+            CampaignName: campaign.CampaignName,
+            Commission: campaign.Commission,
+            Complete: campaign.Complete,
+            Revenue: campaign.Revenue,
+            Datetime: convertDotNetDate(campaign.Datetime),
+          }))
+        )
+      ).filter(Boolean); // undefined 제거
+
+      if (Array.isArray(allCampaigns) && allCampaigns.length > 0) {
+        const newChartData = allCampaigns.map((item) => ({
           name: item.CampaignName,
           y: item.Revenue,
         }));
-        const newGridData = campaigns.map((item: GridColumn) => ({
+
+        const newGridData = allCampaigns.map((item) => ({
           CampaignName: item.CampaignName,
           Commission: item.Commission,
           Complete: item.Complete,
           Revenue: item.Revenue,
-          Datetime: convertDotNetDate(item.Datetime)
-
+          Datetime: item.Datetime,
         }));
+
         setChartData(newChartData);
         setGridData(newGridData);
-        console.log("📊 Chart Data:", newChartData);
+        console.log('📊 Chart Data (전체 월 데이터 포함):', newChartData);
       } else {
-        console.warn("⚠️ Campaign 데이터가 올바르게 로드되지 않았습니다.");
+        console.warn('⚠️ Campaign 데이터가 올바르게 로드되지 않았습니다.');
       }
     }
   }, [data]);
