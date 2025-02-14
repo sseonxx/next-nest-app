@@ -3,6 +3,11 @@ import { InferGetServerSidePropsType } from 'next';
 import style from './index.module.css';
 
 export const getServerSideProps = () => {
+  // 병렬 형식
+  // const [allBooks, recoBooks] = await Promise.all([
+  //   fetchBooks(),
+  //   fetchRandomBooks(),
+  // ])
   const data = "hello";
   return {
     props: {

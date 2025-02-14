@@ -1,6 +1,17 @@
+import { GetServerSidePropsContext } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react";
+
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const id = context.params!.id; // undefined 가 아닐것이다 미리 단언 사전 
+
+  return {
+    props: {}
+  }
+}
 
 export default function Page() {
   const [presetData, setPresetData] = useState({});
@@ -33,19 +44,19 @@ export default function Page() {
     };
     const sanitizeData = (rawData: string | null): string | null => {
       if (!rawData) return null; // 입력값이 null이면 그대로 반환
-    
+
       return rawData
-       // 작은따옴표를 큰따옴표로 변환
-       .replace(/'/g, '"')
-      // 문자열 중간의 "s를 's로 복구
-      .replace(/"\b(.*?)\b"s\b/g, '"$1\'s')
-      // 문자열 값 중간에 있는 잘못된 큰따옴표 처리
-      .replace(/"\s*(\w+)\s*"\s*(\w+)/g, '"$1 $2')
-      // 문자열 내부 중첩된 큰따옴표를 작은따옴표로 변환
-      .replace(/"(.*?)"(.*?)"(.*?)"/g, '"$1\'$2\'$3"');
+        // 작은따옴표를 큰따옴표로 변환
+        .replace(/'/g, '"')
+        // 문자열 중간의 "s를 's로 복구
+        .replace(/"\b(.*?)\b"s\b/g, '"$1\'s')
+        // 문자열 값 중간에 있는 잘못된 큰따옴표 처리
+        .replace(/"\s*(\w+)\s*"\s*(\w+)/g, '"$1 $2')
+        // 문자열 내부 중첩된 큰따옴표를 작은따옴표로 변환
+        .replace(/"(.*?)"(.*?)"(.*?)"/g, '"$1\'$2\'$3"');
     };
 
-    
+
 
     fetch('/api/proxy')
       .then((res) => res.text())
@@ -59,11 +70,11 @@ export default function Page() {
         console.log(rawMAPS);
 
         const result = {
-          items:sanitizeData(rawITEMS),
+          items: sanitizeData(rawITEMS),
           mobs: sanitizeData(rawMOBS),
           maps: sanitizeData(rawMAPS)
         }
-        console.log("result >>", result.items?.slice(220040,225000));
+        console.log("result >>", result.items?.slice(220040, 225000));
         // console.log(JSON.parse(result.items || ""));
 
 

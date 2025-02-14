@@ -1,4 +1,5 @@
 import SearchItem from "@/components/search-item";
+import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router"
 /*
@@ -6,11 +7,27 @@ http://localhost:3000/search
 
 --> http://localhost:3000/search?q=박서은
  */
-export default function Page() {
-  const router = useRouter();
-  const { q } = router.query;
 
-  console.log(router);
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+  // getServerSidePropsContext
+  // q 값을 가져올 수 있다
+
+  const q = context.query.q;
+  // const books = await fetchBooks(q as string)
+
+
+  return {
+    props: {
+      // books,
+      q
+    }
+  }
+}
+export default function Page({ q }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const router = useRouter();
+  // const { q } = router.query;
+
+  // console.log(router);
   console.log("q>>", q);
 
 
