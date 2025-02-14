@@ -22,7 +22,7 @@ const Page = (props: Props) => {
         type: 'column'
       },
       title: {
-        text: 'Corn vs wheat estimated production for 2023'
+        text: '차트'
       },
       subtitle: {
         text:
@@ -36,12 +36,14 @@ const Page = (props: Props) => {
       yAxis: {
         min: 0,
         title: { text: 'Revenue (원)' },
+
       },
       tooltip: { valueSuffix: '원' },
       plotOptions: {
         column: {
           pointPadding: 0.2,
-          borderWidth: 0
+          borderWidth: 0,
+          minPointLength: 5,
         }
       },
       series: chartData,
@@ -148,14 +150,18 @@ const Page = (props: Props) => {
       if (selected.month) {
         const appRevenue: Record<string, number> = {};
         data?.Payment?.Monthly?.forEach((month: any) => {
-          if (formatToYearMonth(month.Datetime) === `${selected.year}-${String(selected.month).padStart(2, '0')}`) {
-            month?.App?.forEach((app: any) => {
-              appRevenue[app.AppName] = (appRevenue[app.AppName] || 0) + app.Revenue;
-            });
-          }
+          console.log("month >>", month);
+
+          month?.App?.forEach((app: any) => {
+            appRevenue[app.AppName] = (appRevenue[app.AppName] || 0) + app.Revenue;
+          });
+
         });
 
         const apps = Object.keys(appRevenue);
+        console.log("appRevenue>>>", appRevenue);
+        console.log("apps>>>", apps);
+
         setCategories(apps);
         const series = [
           {
@@ -171,6 +177,9 @@ const Page = (props: Props) => {
           const totalRevenue = month?.App?.reduce((acc: number, app: any) => acc + (app.Revenue || 0), 0);
           monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + totalRevenue;
         });
+        
+        
+        setCategories(Array.from({ length: 12 }, (_, i) => `${i + 1}월`));
 
         const newChartData = [
           {
@@ -236,14 +245,14 @@ const Page = (props: Props) => {
         <MaterialReactTable
           columns={columns}
           data={gridData}
-          enableColumnFilters
+          // enableColumnFilters
           enableGrouping // 그룹핑 활성화
           enablePagination={false}
           enableRowVirtualization={true}
           muiTableContainerProps={{ sx: { minHeight: '800px', maxHeight: '800px' } }} // 스크롤 높이 제한
           initialState={{
             grouping: ['month', 'AppName'], // 초기에 'state' 컬럼으로 그룹화
-            expanded: false, // 그룹을 기본적으로 펼침
+            expanded: false,
           }}
         />
       </div>
