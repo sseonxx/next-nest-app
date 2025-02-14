@@ -32,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <header style={{height:"200px" , borderColor:"black", border:"solid"}}>
+        <header style={{  borderColor: "black", border: "solid" }}>
           헤더입니다<br />
           <ul>
             <li>
@@ -56,12 +56,15 @@ export default function RootLayout({
             <li>
               <Link href={"/iga"}>Data Assignment</Link>
             </li>
+            <li>
+              <Link href={"/iga2"}>월별 성과</Link>
+            </li>
           </ul>
         </header>
-        <main style={{ border:"solid"}}>
+        <main style={{ border: "solid" }}>
           {children}
         </main>
-        <footer style={{height:"100px",border:"solid"}}>
+        <footer style={{ height: "100px", border: "solid" }}>
           푸터 입니다
         </footer>
       </body>
