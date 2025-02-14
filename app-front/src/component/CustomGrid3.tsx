@@ -1,8 +1,7 @@
 "use client"
 
 import React, { useState } from 'react';
-import { MaterialReactTable, type MRT_ColumnDef } from 'material-react-table';
-// import 'material-react-table/dist/index.css';
+
 
 // 원본 데이터
 interface DataItem {
@@ -40,16 +39,6 @@ const groupedData: GroupedData[] = Object.values(
   }, {})
 );
 
-const columns: MRT_ColumnDef<GroupedData>[] = [
-  {
-    accessorKey: 'month',
-    header: 'Month',
-  },
-  {
-    accessorKey: 'costTotal',
-    header: 'Total Cost',
-  },
-];
 
 export default function CustomGrid3() {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
@@ -62,8 +51,6 @@ export default function CustomGrid3() {
   return (
     <div style={{ margin: '20px' }}>
       <h2>MaterialReactTable</h2>
-      <MaterialReactTable columns={columns} data={groupedData} />
-
       <h2>table</h2>
       <table border={1} style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', marginTop: '20px' }}>
         <thead>

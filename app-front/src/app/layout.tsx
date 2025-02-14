@@ -53,6 +53,9 @@ export default function RootLayout({
             <li>
               <Link href={"/assignment"}>Assignment Page</Link>
             </li>
+            <li>
+              <Link href={"/iga"}>Data Assignment</Link>
+            </li>
           </ul>
         </header>
         <main style={{ border:"solid"}}>

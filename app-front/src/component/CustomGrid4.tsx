@@ -30,11 +30,14 @@ const groupedData = Object.values(
       }
       acc[item.month].costTotal += item.cost;
       acc[item.month].subRows.push(item);
+
       return acc;
     },
     {}
   )
 );
+
+console.log("groupedData >>", groupedData);
 
 // 🌟 메인 컴포넌트
 export default function CustomGrid4() {
@@ -54,6 +57,34 @@ export default function CustomGrid4() {
         data={groupedData}
         enableExpanding
         getSubRows={(row) => row.subRows as any}
+        renderDetailPanel={({ row }) => {
+          const details = row.original.subRows || [];
+          return details.length > 0 ? (
+            <div>
+              <table border={1} style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#e5e7eb' }}>
+                    <th>카테고리</th>
+                    <th>비용</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {details.map((detail, idx) => (
+                    <tr key={idx}>
+                      <td>{detail.category}</td>
+                      <td>{detail.cost.toLocaleString()} 원</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div style={{ padding: '10px', backgroundColor: '#f3f4f6' }}>
+              <strong>⚠️ 상세 내역이 없습니다.</strong>
+            </div>
+          );
+        }}
+
       />
     </div>
   );
