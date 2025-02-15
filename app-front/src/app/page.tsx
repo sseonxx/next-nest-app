@@ -24,10 +24,6 @@ export default function Home() {
               className="logo" />
             <div className="p-3">
               <h5 className="fw-bold">캠페인별 수익 내용</h5>
-              <div className="d-flex justify-content-between align-items-center">
-                <div><i className="fas fa-shopping-cart"></i> 40 Purchases</div>
-                <div className="fw-bold">$39</div>
-              </div>
               <div className="mt-2">
                 <span className="text-warning"><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i></span>
               </div>
@@ -46,10 +42,6 @@ export default function Home() {
 
             <div className="p-3">
               <h5 className="fw-bold">월별 성과</h5>
-              <div className="d-flex justify-content-between align-items-center">
-                <div><i className="fas fa-shopping-cart"></i> 2807 Purchases</div>
-                <div className="fw-bold">$39</div>
-              </div>
               <div className="mt-2">
                 <span className="text-warning"><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i></span>
               </div>
@@ -69,8 +61,8 @@ export default function Home() {
             <div className="p-3">
               <h5 className="fw-bold">캠페인 ROI 분석</h5>
               <div className="d-flex justify-content-between align-items-center">
-                <div><i className="fas fa-shopping-cart"></i> 202 Purchases</div>
-                <div className="fw-bold">$39</div>
+                <div><i className="fas fa-shopping-cart"></i>광고 지출 대비 수익률을 의미합니다.</div>
+             
               </div>
               <div className="mt-2">
                 <span className="text-warning"><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i></span>

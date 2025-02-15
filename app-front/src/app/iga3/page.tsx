@@ -30,7 +30,7 @@ const Page = (props: Props) => {
   const [data, setData] = useState<any>(null);
   const [appChartData, setAppChartData] = useState<any[]>([]);
   const [campaignChartData, setCampaignChartData] = useState<any[]>([]);
-  const [selected, setSelected] = useState<{ year: number; month?: number }>({ year: 2021 });
+  const [selected, setSelected] = useState<{ year: number; month?: number }>({ year: 2020 });
   const { selectedApp, setSelectedApp } = useAppStore();
 
   // 앱별 Highcharts 옵션
@@ -235,7 +235,7 @@ const Page = (props: Props) => {
 
   return (
     <div>
-
+      <h2>캠페인 별 ROI(Return on investment)</h2>
       <div style={{ margin: '20px', display: 'flex', gap: '20px' }}>
         <FormControl variant="outlined" style={{ minWidth: 100 }} size='small'>
           <InputLabel>연도 선택</InputLabel>
