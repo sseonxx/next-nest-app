@@ -2,7 +2,7 @@
 
 import { getDemoData } from '@/api/dataFetchApi';
 import CustomPieChart from '@/component/CustomPieChart';
-import { FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material';
+import { useYearMonthSelector } from '@/hooks/useYearMonthSelector';
 import React, { useEffect, useMemo, useState } from 'react';
 import { create } from 'zustand';
 
@@ -30,8 +30,8 @@ const Page = (props: Props) => {
   const [data, setData] = useState<any>(null);
   const [appChartData, setAppChartData] = useState<any[]>([]);
   const [campaignChartData, setCampaignChartData] = useState<any[]>([]);
-  const [selected, setSelected] = useState<{ year: number; month?: number }>({ year: 2020 });
   const { selectedApp, setSelectedApp } = useAppStore();
+  const { selected, YearMonthSelector } = useYearMonthSelector();
 
   // 앱별 Highcharts 옵션
   const appChartOptions: Highcharts.Options = useMemo(() => ({
@@ -220,50 +220,10 @@ const Page = (props: Props) => {
     }
   }, [selectedApp, data]);
 
-  const handleYearChange = (e: SelectChangeEvent<number>) => {
-    const year = Number(e.target.value);
-    setSelected({ year, month: undefined });
-  };
-
-  const handleMonthChange = (e: SelectChangeEvent<number>) => {
-    const month = e.target.value === '' ? undefined : Number(e.target.value);
-    setSelected((prev) => ({
-      ...prev,
-      month,
-    }));
-  };
-
   return (
     <div>
       <h2>캠페인 별 ROI(Return on investment)</h2>
-      <div style={{ margin: '20px', display: 'flex', gap: '20px' }}>
-        <FormControl variant="outlined" style={{ minWidth: 100 }} size='small'>
-          <InputLabel>연도 선택</InputLabel>
-          <Select
-            value={selected.year}
-            onChange={handleYearChange}
-            label="연도 선택"
-          >
-            {[2018, 2019, 2020, 2021].map((year) => (
-              <MenuItem key={year} value={year}>{year}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl variant="outlined" style={{ minWidth: 100 }} size='small'>
-          <InputLabel>월 선택</InputLabel>
-          <Select
-            value={selected.month ?? ''}
-            onChange={handleMonthChange}
-            label="월 선택"
-          >
-            <MenuItem value=""><em>전체</em></MenuItem>
-            {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-              <MenuItem key={month} value={month}>{month}월</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </div>
+      <YearMonthSelector />
 
       <div style={{ margin: '20px', display: 'flex', gap: '20px' }}>
         {/* 앱별 버블 차트 */}

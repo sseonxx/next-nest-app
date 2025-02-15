@@ -2,11 +2,11 @@
 
 import { getDemoData } from '@/api/dataFetchApi';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Select, MenuItem, FormControl, InputLabel, SelectChangeEvent } from '@mui/material';
 import { convertDotNetDate, formatToYearMonth } from '@/common/format';
 import { GridColumn } from '@/type/GridColumn';
 import { MaterialReactTable, MRT_ColumnDef } from 'material-react-table';
 import CustomPieChart from '@/component/CustomPieChart';
+import { useYearMonthSelector } from '@/hooks/useYearMonthSelector';
 
 type Props = {}
 
@@ -15,7 +15,8 @@ const Page = (props: Props) => {
   const [categories, setCategories] = useState<string[]>([]);
   const [chartData, setChartData] = useState<{ name: string; data: number[] }[]>([]);
   const [gridData, setGridData] = useState<GridColumn[]>([]);
-  const [selected, setSelected] = useState<{ year: number; month?: number }>({ year: 2021 });
+  const { selected, YearMonthSelector } = useYearMonthSelector();
+
   // 하이차트 옵션
   const options: Highcharts.Options = useMemo(
     () => ({
@@ -103,7 +104,7 @@ const Page = (props: Props) => {
       setData(response.data);
     } catch (error: any) {
       console.error("Fetch Error:", error.message);
-    } 
+    }
   };
 
   useEffect(() => {
@@ -197,53 +198,11 @@ const Page = (props: Props) => {
     }
   }, [data]);
 
-  const handleYearChange = (e: SelectChangeEvent<number>) => {
-    const year = Number(e.target.value);
-    setSelected({ year, month: undefined });
-  }
-
-  const handleMonthChange = (e: SelectChangeEvent<number>) => {
-    const month = e.target.value === '' ? undefined : Number(e.target.value);
-    setSelected((prev) => ({
-      ...prev,
-      month,
-    }));
-  };
-
   return (
     <div>
       <h2>월별 성과</h2>
-      <div style={{ margin: '20px', display: 'flex', gap: '20px' }}>
-        <FormControl variant="outlined" style={{ minWidth: 100 }} size='small'>
-          <InputLabel>연도 선택</InputLabel>
-          <Select
-            value={selected.year}
-            onChange={handleYearChange}
-            label="연도 선택"
-          >
-            {[2018, 2019, 2020, 2021].map((year) => (
-              <MenuItem key={year} value={year}>{year}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl variant="outlined" style={{ minWidth: 100 }} size='small'>
-          <InputLabel>월 선택</InputLabel>
-          <Select
-            value={selected.month ?? ''}
-            onChange={handleMonthChange}
-            label="월 선택"
-          >
-            <MenuItem value=""><em>전체</em></MenuItem>
-            {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-              <MenuItem key={month} value={month}>{month}월</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </div>
-      <div>
-        <CustomPieChart options={options} />
-      </div>
-
+      <YearMonthSelector />
+      <CustomPieChart options={options} />
       <MaterialReactTable
         columns={columns}
         data={gridData}
@@ -260,8 +219,8 @@ const Page = (props: Props) => {
         }}
         muiTableBodyRowProps={({ row }) => ({
           sx: {
-            backgroundColor: row.depth === 0 ? '#e5f6fd' : // 최상위 그룹 행은 연한 파란색
-              row.depth === 1 ? '#F4FBFE' : // 2차 그룹 행은 연한 초록색
+            backgroundColor: row.depth === 0 ? '#e5f6fd' : // 최상위 그룹 행
+              row.depth === 1 ? '#F4FBFE' : // 2차 그룹 행
                 'white', // 일반 행은 흰색
             color: row.depth === 0 ? 'black' : 'inherit',
 
@@ -280,7 +239,7 @@ const Page = (props: Props) => {
         }}
       />
 
-    </div>
+    </div >
   )
 }
 
