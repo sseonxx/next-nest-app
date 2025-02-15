@@ -111,6 +111,37 @@ footer {
 
 .pt-3, .footer__copyright, .py-3 {padding-top: 1rem !important;}
 
+.template-card {
+  border: 1px solid #ddd;
+  border-radius: 15px;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+  height: 100%;
+}
+.template-card:hover {
+  transform: translateY(-10px);
+}
+.template-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.card-footer .fa-star {
+  color: gold;
+}
+.row.row-cols-md-3 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.col {
+  flex: 1 1 calc(33.333% - 1rem);
+  max-width: calc(33.333% - 1rem);
+  box-sizing: border-box;
+}
+
 .footer__nav ul.list-nav { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: horizontal; -webkit-box-direction: normal; -ms-flex-direction: row; flex-direction: row; -webkit-box-pack: start; -ms-flex-pack: start; justify-content: flex-start; }
 .footer__nav ul.list-nav > li > a { display: block; font-weight: bold; font-size: 1.125rem; padding: 0.5rem 0; color: #fff; }
 .footer__nav ul.list-nav > li > a.disabled { color: #fff; opacity: 0.4; }

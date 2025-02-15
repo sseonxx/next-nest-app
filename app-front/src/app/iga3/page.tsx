@@ -2,19 +2,25 @@
 
 import { getDemoData } from '@/api/dataFetchApi';
 import CustomPieChart from '@/component/CustomPieChart';
-import { GridColumn } from '@/type/GridColumn';
 import { FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import React, { useEffect, useMemo, useState } from 'react';
+import { create } from 'zustand';
 
 type Props = {};
 
-type BubblePoint = { x: number; y: number; z: number; name: string };
+type Store = {
+  selectedApp: string | null;
+  setSelectedApp: (app: string | null) => void;
+};
+const useAppStore = create<Store>((set) => ({
+  selectedApp: null,
+  setSelectedApp: (app) => set({ selectedApp: app }),
+}));
 
-// 🎨 동적 색상 생성 (HSL 기반)
-export const getColorForApp = (appName: string) => {
+export const getColorForApp = (name: string) => {
   let hash = 0;
-  for (let i = 0; i < appName.length; i++) {
-    hash = appName.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
   const hue = hash % 360;
   return `hsl(${hue}, 70%, 50%)`;
@@ -22,11 +28,13 @@ export const getColorForApp = (appName: string) => {
 
 const Page = (props: Props) => {
   const [data, setData] = useState<any>(null);
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [appChartData, setAppChartData] = useState<any[]>([]);
+  const [campaignChartData, setCampaignChartData] = useState<any[]>([]);
   const [selected, setSelected] = useState<{ year: number; month?: number }>({ year: 2021 });
+  const { selectedApp, setSelectedApp } = useAppStore();
 
-  // 📊 Highcharts 옵션 설정
-  const options: Highcharts.Options = useMemo(() => ({
+  // 앱별 Highcharts 옵션
+  const appChartOptions: Highcharts.Options = useMemo(() => ({
     chart: {
       type: 'bubble',
       plotBorderWidth: 1,
@@ -34,41 +42,96 @@ const Page = (props: Props) => {
       backgroundColor: '#f0f4f7',
       style: { fontFamily: 'Roboto, sans-serif' }
     },
-    title: { text: '📊 앱(App)별 통합 성과 버블 차트' },
-    xAxis: {
-      title: { text: '완료 수(Complete)' },
-      gridLineWidth: 1
-    },
-    yAxis: {
-      title: { text: '수익(Revenue) (₩)' },
-      labels: { format: '{value}₩' }
-    },
+    title: { text: '앱(App)별 통합 성과 버블 차트' },
+    xAxis: { title: { text: '완료 수(Complete)' } },
+    yAxis: { title: { text: '수익(Revenue)' } },
     tooltip: {
       useHTML: true,
-      headerFormat: '<b>{point.name}</b><br>',
       pointFormat: `
-        완료 수(Complete): {point.x}<br/>
-        총 수익(Revenue): {point.y}₩<br/>
-        ROI(%) [버블 크기]: {point.z}`
+        <b>{point.name}</b><br/>
+        완료 수: {point.x}<br/>
+        수익: {point.y}<br/>
+        ROI(버블 크기): {point.z}`
     },
     plotOptions: {
-      bubble: {
-        dataLabels: {
-          enabled: true,
-          format: '{point.name}'
+      series: {
+        point: {
+          events: {
+            click: function () {
+              setSelectedApp(this.name);
+            }
+          }
         }
       }
     },
-    series: chartData
-  }), [chartData]);
+    series: appChartData
+  }), [appChartData, setSelectedApp]);
 
-  // 📡 데이터 불러오기
+  // 캠페인별 Highcharts 옵션
+  const campaignChartOptions: Highcharts.Options = useMemo(() => {
+    if (!selectedApp) {
+      return {
+        chart: { type: 'bubble', backgroundColor: '#f7f7f7' },
+        title: { text: '' },
+        xAxis: { title: { text: '완료 수(Complete)' } },
+        yAxis: { title: { text: '수익(Revenue)' } },
+        plotOptions: {
+          series: {
+            dataLabels: {
+              enabled: true,
+              align: 'center',
+              verticalAlign: 'middle',
+              style: {
+                // fontSize: '18px',
+                // color: '#999',
+                textAlign: 'center'
+              }
+            }
+          }
+        },
+        series: [{
+          type: 'scatter',
+          data: [[0, 0]],
+          showInLegend: false,
+          dataLabels: {
+            enabled: true,
+            format: "🖱️ 앱을 클릭하여 상세 캠페인을 확인하세요"
+          }
+        }]
+      };
+    }
+
+    return {
+      chart: { type: 'bubble', backgroundColor: '#f7f7f7' },
+      title: { text: `${selectedApp}의 상위 10개 캠페인 버블 차트` },
+      xAxis: { title: { text: '완료 수(Complete)' } },
+      yAxis: { title: { text: '수익(Revenue)' } },
+      tooltip: {
+        useHTML: true,
+        pointFormat: `
+          <b>{point.name}</b><br/>
+          완료 수: {point.x}<br/>
+          수익: {point.y}<br/>
+          ROI(버블 크기): {point.z}%<br/>
+          수수료: {point.fee}₩`
+      },
+      plotOptions: {
+        bubble: {
+          dataLabels: {
+            enabled: true,
+            format: '{point.name}'
+          }
+        }
+      },
+      series: campaignChartData
+    };
+  }, [campaignChartData, selectedApp]);
+
   const fetchData = async () => {
     try {
       const params = selected.month
         ? { search_year: selected.year, search_month: selected.month }
         : { search_year: selected.year };
-
       const response = await getDemoData(params);
       setData(response.data);
     } catch (error: any) {
@@ -78,9 +141,9 @@ const Page = (props: Props) => {
 
   useEffect(() => {
     fetchData();
+    setSelectedApp(null)
   }, [selected]);
 
-  // 📊 앱별 데이터 통합
   useEffect(() => {
     if (data) {
       const appSummary: Record<string, { complete: number; revenue: number; commission: number }> = {};
@@ -100,7 +163,6 @@ const Page = (props: Props) => {
         });
       });
 
-      // 📈 데이터 포인트 생성
       const seriesData = Object.entries(appSummary).map(([name, { complete, revenue, commission }]) => {
         const roi = commission > 0 ? Math.round((revenue / commission) * 100) : revenue;
         return {
@@ -110,17 +172,59 @@ const Page = (props: Props) => {
         };
       });
 
-      setChartData(seriesData);
+      setAppChartData(seriesData);
     }
   }, [data]);
 
-  // 📆 연도 변경 핸들러
+  //선택된 앱의 상위 10개 캠페인 데이터 생성
+  useEffect(() => {
+    if (selectedApp && data) {
+      const campaignSummary: Record<string, { complete: number; revenue: number; commission: number }> = {};
+
+      data?.Payment?.Monthly?.forEach((monthObj: any) => {
+        monthObj.App?.forEach((app: any) => {
+          if (app.AppName === selectedApp) {
+            app?.Campaign?.forEach((campaign: any) => {
+              const campaignName = campaign.CampaignName;
+              if (!campaignSummary[campaignName]) {
+                campaignSummary[campaignName] = { complete: 0, revenue: 0, commission: 0 };
+              }
+              campaignSummary[campaignName].complete += campaign.Complete || 0;
+              campaignSummary[campaignName].revenue += campaign.Revenue || 0;
+              campaignSummary[campaignName].commission += campaign.Commission || 0;
+            });
+          }
+        });
+      });
+
+      // 상위 10개 선택
+      const top10Campaigns = Object.entries(campaignSummary)
+        .sort(([, a], [, b]) => b.revenue - a.revenue)
+        .slice(0, 10)
+        .map(([name, { complete, revenue, commission }]) => {
+          const roi = commission > 0 ? Math.round((revenue / commission) * 100) : revenue;
+          return {
+            name,
+            color: getColorForApp(name),
+            data: [{
+              x: complete,
+              y: revenue,
+              z: roi,
+              name,
+              fee: commission
+            }]
+          };
+        });
+
+      setCampaignChartData(top10Campaigns);
+    }
+  }, [selectedApp, data]);
+
   const handleYearChange = (e: SelectChangeEvent<number>) => {
     const year = Number(e.target.value);
     setSelected({ year, month: undefined });
   };
 
-  // 📆 월 변경 핸들러
   const handleMonthChange = (e: SelectChangeEvent<number>) => {
     const month = e.target.value === '' ? undefined : Number(e.target.value);
     setSelected((prev) => ({
@@ -129,9 +233,9 @@ const Page = (props: Props) => {
     }));
   };
 
-  // 🖼️ UI 렌더링
   return (
     <div>
+
       <div style={{ margin: '20px', display: 'flex', gap: '20px' }}>
         <FormControl variant="outlined" style={{ minWidth: 100 }} size='small'>
           <InputLabel>연도 선택</InputLabel>
@@ -161,8 +265,11 @@ const Page = (props: Props) => {
         </FormControl>
       </div>
 
-      <div> 
-        <CustomPieChart options={options} />
+      <div style={{ margin: '20px', display: 'flex', gap: '20px' }}>
+        {/* 앱별 버블 차트 */}
+        <CustomPieChart options={appChartOptions} />
+        {/* 캠페인별 버블 차트 */}
+        <CustomPieChart options={campaignChartOptions} />
       </div>
     </div>
   );

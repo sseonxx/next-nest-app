@@ -35,33 +35,17 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <header>
-          <Image
-            src="/navbar-brand.svg"
-            alt="Logo"
-            width={143}
-            height={40}
-            className="logo" />
+          <Link href={"/"}>
+              <Image
+                src="/navbar-brand.svg"
+                alt="Logo"
+                width={143}
+                height={40}
+                className="logo" />
+          </Link>
           <ul>
-            {/* <li>
-              <Link href={"/"}>index</Link>
-            </li>
             <li>
-              <Link href={"/item/1"}>item</Link>
-            </li>
-            <li>
-              <Link href={"/search?q=서은"}>Search</Link>
-            </li>
-            <li>
-              <Link href={"/users/login"}>login</Link>
-            </li>
-            <li>
-              <Link href={"/users/signup"}>signup</Link>
-            </li>
-            <li>
-              <Link href={"/assignment"}>Assignment Page</Link>
-            </li> */}
-            <li>
-              <Link href={"/iga"}>Data Assignment</Link>
+              <Link href={"/iga"}>캠페인별 수익 내용</Link>
             </li>
             <li>
               <Link href={"/iga2"}>월별 성과</Link>
@@ -72,7 +56,7 @@ export default function RootLayout({
           </ul>
         </header>
         <main>
-        <GloabalLoading />
+          <GloabalLoading />
           {children}
         </main>
         <footer className="footer st-current">
