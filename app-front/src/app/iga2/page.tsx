@@ -31,7 +31,7 @@ const Page = (props: Props) => {
         title: { text: selected.month ? 'App Name' : 'Month' },
       },
       yAxis: {
-        min: 0,
+        min: undefined,
         title: { text: 'Revenue (원)' },
 
       },
@@ -41,6 +41,7 @@ const Page = (props: Props) => {
           pointPadding: 0.2,
           borderWidth: 0,
           minPointLength: 5,
+          stacking: 'normal' //stack 추가
         }
       },
       series: chartData,
@@ -162,20 +163,32 @@ const Page = (props: Props) => {
         }))
         setChartData(series);
       } else {
-        const monthlyRevenue: { [key: string]: number } = {};
+        const appRevenueByMonth: Record<string, Record<string, number>> = {};
+
         data?.Payment?.Monthly?.forEach((month: any) => {
           const monthKey = formatToYearMonth(month.Datetime);
-          const totalRevenue = month?.App?.reduce((acc: number, app: any) => acc + (app.Revenue || 0), 0);
-          monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + totalRevenue;
+          month?.App?.forEach((app: any) => {
+            if (!appRevenueByMonth[app.AppName]) {
+              appRevenueByMonth[app.AppName] = {};
+            }
+            appRevenueByMonth[app.AppName][monthKey] = (appRevenueByMonth[app.AppName][monthKey] || 0) + (app.Revenue || 0);
+          });
         });
-        setCategories(Array.from({ length: 12 }, (_, i) => `${i + 1}월`));
-        const newChartData = [
-          {
-            name: '월별 Revenue',
-            data: Object.entries(monthlyRevenue).map(([key, value]) => value),
-          },
-        ];
-        setChartData(newChartData);
+
+        const categories = Array.from({ length: 12 }, (_, i) => `${i + 1}월`);
+        setCategories(categories);
+
+        const series = Object.entries(appRevenueByMonth).map(([appName, monthlyData]) => ({
+          name: appName,
+          data: categories.map((month, index) => {
+            const monthKey = `${selected.year}.${String(index + 1).padStart(2, '0')}`; // ex: 2020.01
+            const value = monthlyData[monthKey] || 0
+            return value === 0 ? null : value;
+          }),
+          stack: 'monthlyRevenue',
+        }));
+
+        setChartData(series);
       }
     }
   }, [data]);
@@ -226,34 +239,34 @@ const Page = (props: Props) => {
       <div>
         <CustomPieChart options={options} />
       </div>
-     
-        <MaterialReactTable
-          columns={columns}
-          data={gridData}
-          enableGrouping // 그룹핑 활성화
-          enablePagination={false} // 페이지네이션 비활성화
-          enableRowVirtualization={true} //행 가상화 활성화화
-          muiTableContainerProps={{ sx: { minHeight: '500px', maxHeight: '500px' } }} // 스크롤 높이 제한
-          muiTableBodyRowProps={({ row }) => ({
-            sx: {
-              backgroundColor: row.depth === 0 ? '#e5f6fd' : // 최상위 그룹 행은 연한 파란색
-                               row.depth === 1 ? '#F4FBFE' : // 2차 그룹 행은 연한 초록색
-                               'white', // 일반 행은 흰색
-              color: row.depth === 0 ? 'black' : 'inherit',
-           
-            }
-          })}
-          muiTableBodyCellProps={{
-            sx: {
-              padding: '4px 8px', 
-              fontSize: '12px',
-            }
-          }}
-          initialState={{
-            grouping: ['month', 'AppName'], 
-            // expanded: " ExpandedState",
-          }}
-        />
+
+      <MaterialReactTable
+        columns={columns}
+        data={gridData}
+        enableGrouping // 그룹핑 활성화
+        enablePagination={false} // 페이지네이션 비활성화
+        enableRowVirtualization={true} //행 가상화 활성화화
+        muiTableContainerProps={{ sx: { minHeight: '500px', maxHeight: '500px' } }} // 스크롤 높이 제한
+        muiTableBodyRowProps={({ row }) => ({
+          sx: {
+            backgroundColor: row.depth === 0 ? '#e5f6fd' : // 최상위 그룹 행은 연한 파란색
+              row.depth === 1 ? '#F4FBFE' : // 2차 그룹 행은 연한 초록색
+                'white', // 일반 행은 흰색
+            color: row.depth === 0 ? 'black' : 'inherit',
+
+          }
+        })}
+        muiTableBodyCellProps={{
+          sx: {
+            padding: '4px 8px',
+            fontSize: '12px',
+          }
+        }}
+        initialState={{
+          grouping: ['month', 'AppName'],
+          // expanded: " ExpandedState",
+        }}
+      />
 
     </div>
   )
