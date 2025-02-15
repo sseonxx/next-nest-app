@@ -29,7 +29,11 @@ const Page = (props: Props) => {
   const [selected, setSelected] = useState<{ year: number; month?: number }>({ year: 2021 });
   // 하이차트 옵션
   const options: Highcharts.Options = {
-    chart: { type: "pie" },
+    chart: { 
+      type: "pie", 
+      backgroundColor: '#f0f4f7',
+      style: { fontFamily: 'Roboto, sans-serif' }
+     },
     title: { text: "캠페인별 수익 비용" },
     series: [
       {
@@ -48,14 +52,17 @@ const Page = (props: Props) => {
     {
       accessorKey: 'Commission',
       header: '수수료',
+      Cell: ({ cell }) => cell.getValue<number>().toLocaleString(),
     },
     {
       accessorKey: 'Complete',
       header: '캠페인 완료 수',
+      Cell: ({ cell }) => cell.getValue<number>().toLocaleString(),
     },
     {
       accessorKey: 'Revenue',
       header: '월 수익',
+      Cell: ({ cell }) => cell.getValue<number>().toLocaleString(),
     },
     {
       accessorKey: 'Datetime',
@@ -169,14 +176,21 @@ const Page = (props: Props) => {
       <MaterialReactTable
         columns={columns}
         data={gridData}
-        enableColumnFilters 
+        enableColumnFilters
         muiTableBodyCellProps={{
           sx: {
-            padding: '4px 8px', 
-            fontSize: '12px', 
+            padding: '4px 8px',
+            fontSize: '12px',
           }
         }}
-        />
+        muiTableHeadCellProps={{
+          sx: {
+            textAlign: 'center', // 📑 헤더 중앙 정렬
+            fontWeight: 'bold',
+            fontSize: '14px',
+          }
+        }}
+      />
 
     </div>
   );

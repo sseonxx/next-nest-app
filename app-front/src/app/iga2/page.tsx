@@ -21,7 +21,8 @@ const Page = (props: Props) => {
     () => ({
       chart: {
         type: 'column',
-        // width: 1100,
+        backgroundColor: '#f0f4f7',
+        style: { fontFamily: 'Roboto, sans-serif' }
       },
       title: {
         text: ''
@@ -32,10 +33,10 @@ const Page = (props: Props) => {
       },
       yAxis: {
         min: undefined,
-        title: { text: 'Revenue (원)' },
+        title: { text: 'Revenue' },
 
       },
-      tooltip: { valueSuffix: '원' },
+      tooltip: { valueSuffix: '' },
       plotOptions: {
         column: {
           pointPadding: 0.2,
@@ -69,19 +70,22 @@ const Page = (props: Props) => {
     {
       accessorKey: 'Commission',
       header: '수수료',
-      AggregatedCell: ({ cell }) => `${cell.getValue<number>()}`
+      AggregatedCell: ({ cell }) => `${cell.getValue<number>().toLocaleString()}`,
+      Cell: ({ cell }) => cell.getValue<number>().toLocaleString(),
     },
     {
       accessorKey: 'Complete',
-      header: '캠페인 완료 수',
-      AggregatedCell: ({ cell }) => `${cell.getValue<number>()}`,
-      maxSize: 100,
+      header: (<div style={{ textAlign: 'center' }}>캠페인<br/>완료 수</div>),
+      AggregatedCell: ({ cell }) => `${cell.getValue<number>().toLocaleString()}`,
+      Cell: ({ cell }) => cell.getValue<number>().toLocaleString(),
+      // maxSize: 100,
     },
     {
       accessorKey: 'Revenue',
       header: '월 수익',
       aggregationFn: 'sum',
-      AggregatedCell: ({ cell }) => `${cell.getValue<number>()}`
+      AggregatedCell: ({ cell }) => `${cell.getValue<number>().toLocaleString()}`,
+      Cell: ({ cell }) => cell.getValue<number>().toLocaleString(),
     },
   ]
 
@@ -247,6 +251,13 @@ const Page = (props: Props) => {
         enablePagination={false} // 페이지네이션 비활성화
         enableRowVirtualization={true} //행 가상화 활성화화
         muiTableContainerProps={{ sx: { minHeight: '500px', maxHeight: '500px' } }} // 스크롤 높이 제한
+        muiTableHeadCellProps={{
+          sx: {
+            textAlign: 'center', // 📑 헤더 중앙 정렬
+            fontWeight: 'bold',
+            fontSize: '14px',
+          }
+        }}
         muiTableBodyRowProps={({ row }) => ({
           sx: {
             backgroundColor: row.depth === 0 ? '#e5f6fd' : // 최상위 그룹 행은 연한 파란색
@@ -256,6 +267,7 @@ const Page = (props: Props) => {
 
           }
         })}
+        
         muiTableBodyCellProps={{
           sx: {
             padding: '4px 8px',
