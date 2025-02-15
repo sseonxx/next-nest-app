@@ -66,6 +66,9 @@ export default function RootLayout({
             <li>
               <Link href={"/iga2"}>월별 성과</Link>
             </li>
+            <li>
+              <Link href={"/iga3"}>캠페인 ROI 분석</Link>
+            </li>
           </ul>
         </header>
         <main>
