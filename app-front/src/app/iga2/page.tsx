@@ -75,7 +75,7 @@ const Page = (props: Props) => {
     },
     {
       accessorKey: 'Complete',
-      header: (<div style={{ textAlign: 'center' }}>캠페인<br/>완료 수</div>),
+      header: (<div style={{ textAlign: 'center' }}>캠페인<br />완료 수</div>),
       AggregatedCell: ({ cell }) => `${cell.getValue<number>().toLocaleString()}`,
       Cell: ({ cell }) => cell.getValue<number>().toLocaleString(),
       // maxSize: 100,
@@ -103,7 +103,7 @@ const Page = (props: Props) => {
       setData(response.data);
     } catch (error: any) {
       console.error("Fetch Error:", error.message);
-    }
+    } 
   };
 
   useEffect(() => {
@@ -267,7 +267,7 @@ const Page = (props: Props) => {
 
           }
         })}
-        
+
         muiTableBodyCellProps={{
           sx: {
             padding: '4px 8px',

@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import React from "react";
 import Image from "next/image";
+import GloabalLoading from "@/component/GloabalLoading";
 
 /*
   root layout 컴포넌트
@@ -68,6 +69,7 @@ export default function RootLayout({
           </ul>
         </header>
         <main>
+        <GloabalLoading />
           {children}
         </main>
         <footer className="footer st-current">

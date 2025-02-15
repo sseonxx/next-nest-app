@@ -6,7 +6,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Select, MenuItem, FormControl, InputLabel, SelectChangeEvent } from '@mui/material';
 import { MaterialReactTable, MRT_ColumnDef } from 'material-react-table';
 import { convertDotNetDate } from '@/common/format';
-
+import { useAppStore } from '@/store/useAppStore';
 type CampaignItem = {
   CampaignName: string;
   Revenue: number;
@@ -29,11 +29,11 @@ const Page = (props: Props) => {
   const [selected, setSelected] = useState<{ year: number; month?: number }>({ year: 2021 });
   // 하이차트 옵션
   const options: Highcharts.Options = {
-    chart: { 
-      type: "pie", 
+    chart: {
+      type: "pie",
       backgroundColor: '#f0f4f7',
       style: { fontFamily: 'Roboto, sans-serif' }
-     },
+    },
     title: { text: "캠페인별 수익 비용" },
     series: [
       {

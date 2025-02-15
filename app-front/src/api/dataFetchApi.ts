@@ -1,7 +1,7 @@
-import axios, { AxiosResponse } from 'axios';
-import apiInstance from './api';
+import { AxiosResponse } from 'axios';
+import { Post } from './apiHelper';
 
 
 export const getDemoData = (requestData: { search_year: number, search_month?: number }): Promise<AxiosResponse<any>> => {
-  return apiInstance.post("/GetDemoData", requestData);
+  return Post("/GetDemoData", requestData);
 }
