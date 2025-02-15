@@ -11,16 +11,16 @@ type Props = {};
 type BubblePoint = { x: number; y: number; z: number; name: string };
 
 // 🎨 동적 색상 생성 (HSL 기반)
-export const getColorForApp = (appName: string) => {
+export const getColorForCampaign = (campaignName: string) => {
   let hash = 0;
-  for (let i = 0; i < appName.length; i++) {
-    hash = appName.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < campaignName.length; i++) {
+    hash = campaignName.charCodeAt(i) + ((hash << 5) - hash);
   }
   const hue = hash % 360;
   return `hsl(${hue}, 70%, 50%)`;
 };
 
-const Page = (props: Props) => {
+const CampaignChart = (props: Props) => {
   const [data, setData] = useState<any>(null);
   const [chartData, setChartData] = useState<any[]>([]);
   const [selected, setSelected] = useState<{ year: number; month?: number }>({ year: 2021 });
@@ -34,9 +34,9 @@ const Page = (props: Props) => {
       backgroundColor: '#f0f4f7',
       style: { fontFamily: 'Roboto, sans-serif' }
     },
-    title: { text: '📊 앱(App)별 통합 성과 버블 차트' },
+    title: { text: '📊 캠페인별 통합 성과 버블 차트' },
     xAxis: {
-      title: { text: '완료 수(Complete)' },
+      title: { text: '캠페인 완료 수(Complete)' },
       gridLineWidth: 1
     },
     yAxis: {
@@ -80,32 +80,32 @@ const Page = (props: Props) => {
     fetchData();
   }, [selected]);
 
-  // 📊 앱별 데이터 통합
+  // 📊 캠페인별 데이터 통합
   useEffect(() => {
     if (data) {
-      const appSummary: Record<string, { complete: number; revenue: number; commission: number }> = {};
+      const campaignSummary: Record<string, { complete: number; revenue: number; commission: number }> = {};
 
       data?.Payment?.Monthly?.forEach((monthObj: any) => {
         monthObj.App?.forEach((app: any) => {
-          const appName = app.AppName;
-          if (!appSummary[appName]) {
-            appSummary[appName] = { complete: 0, revenue: 0, commission: 0 };
-          }
-
           app?.Campaign?.forEach((campaign: any) => {
-            appSummary[appName].complete += campaign.Complete || 0;
-            appSummary[appName].revenue += campaign.Revenue || 0;
-            appSummary[appName].commission += campaign.Commission || 0;
+            const campaignName = campaign.CampaignName;
+            if (!campaignSummary[campaignName]) {
+              campaignSummary[campaignName] = { complete: 0, revenue: 0, commission: 0 };
+            }
+
+            campaignSummary[campaignName].complete += campaign.Complete || 0;
+            campaignSummary[campaignName].revenue += campaign.Revenue || 0;
+            campaignSummary[campaignName].commission += campaign.Commission || 0;
           });
         });
       });
 
       // 📈 데이터 포인트 생성
-      const seriesData = Object.entries(appSummary).map(([name, { complete, revenue, commission }]) => {
+      const seriesData = Object.entries(campaignSummary).map(([name, { complete, revenue, commission }]) => {
         const roi = commission > 0 ? Math.round((revenue / commission) * 100) : revenue;
         return {
           name,
-          color: getColorForApp(name),
+          color: getColorForCampaign(name),
           data: [{ x: complete, y: revenue, z: roi, name }]
         };
       });
@@ -168,4 +168,4 @@ const Page = (props: Props) => {
   );
 };
 
-export default Page;
+export default CampaignChart;
