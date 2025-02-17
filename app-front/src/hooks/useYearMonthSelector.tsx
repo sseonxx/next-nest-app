@@ -48,5 +48,5 @@ export const useYearMonthSelector = () => {
     </div>
   );
 
-  return { selected, YearMonthSelector };
+  return { selected, setSelected, YearMonthSelector };
 };

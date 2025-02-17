@@ -5,17 +5,22 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { convertDotNetDate, formatToYearMonth } from '@/common/format';
 import { GridColumn } from '@/type/GridColumn';
 import { MaterialReactTable, MRT_ColumnDef } from 'material-react-table';
-import CustomPieChart from '@/component/CustomPieChart';
 import { useYearMonthSelector } from '@/hooks/useYearMonthSelector';
+import { useExcelExport } from '@/hooks/useExcelExport';
+import dynamic from 'next/dynamic';
+const CustomPieChart = dynamic(() => import('@/component/CustomPieChart'), { ssr: false });
 
 type Props = {}
 
 const Page = (props: Props) => {
   const [data, setData] = useState<any>(null);
   const [categories, setCategories] = useState<string[]>([]);
-  const [chartData, setChartData] = useState<{ name: string; data: number[] }[]>([]);
+  const [chartData, setChartData] = useState<{ name: string; data: (number | null)[]; stack?: string }[]>([]);
   const [gridData, setGridData] = useState<GridColumn[]>([]);
-  const { selected, YearMonthSelector } = useYearMonthSelector();
+  const { selected, setSelected, YearMonthSelector } = useYearMonthSelector();
+  const { exportToExcel } = useExcelExport();
+
+  
 
   // 하이차트 옵션
   const options: Highcharts.Options = useMemo(
@@ -46,7 +51,11 @@ const Page = (props: Props) => {
           stacking: 'normal' //stack 추가
         }
       },
-      series: chartData,
+      series: chartData.map(item => ({
+        type: 'column',
+        name: item.name,
+        data: item.data
+      })) as Highcharts.SeriesOptionsType[]
     }),
     [chartData, categories, selected.month]
   );
@@ -76,7 +85,7 @@ const Page = (props: Props) => {
     },
     {
       accessorKey: 'Complete',
-      header: (<div style={{ textAlign: 'center' }}>캠페인<br />완료 수</div>),
+      header: '캠페인\n완료 수',
       AggregatedCell: ({ cell }) => `${cell.getValue<number>().toLocaleString()}`,
       Cell: ({ cell }) => cell.getValue<number>().toLocaleString(),
       // maxSize: 100,
@@ -106,7 +115,9 @@ const Page = (props: Props) => {
       console.error("Fetch Error:", error.message);
     }
   };
-
+  useEffect(() => {
+    setSelected({ year: 2021, month: undefined });
+  }, [])
   useEffect(() => {
     fetchData();
   }, [selected]);
@@ -198,9 +209,19 @@ const Page = (props: Props) => {
     }
   }, [data]);
 
+  // 엑셀 다운로드 핸들러
+  const handleExportToExcel = () => {
+    exportToExcel(gridData, '월별_성과_데이터');
+  };
+
   return (
     <div>
       <h2>월별 성과</h2>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+        <button onClick={handleExportToExcel} style={{ padding: '5px 10px', cursor: 'pointer' }}>
+          엑셀 다운로드
+        </button>
+      </div>
       <YearMonthSelector />
       <CustomPieChart options={options} />
       <MaterialReactTable
@@ -235,7 +256,6 @@ const Page = (props: Props) => {
         }}
         initialState={{
           grouping: ['month', 'AppName'],
-          // expanded: " ExpandedState",
         }}
       />
 

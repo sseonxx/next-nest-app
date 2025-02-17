@@ -1,10 +1,11 @@
 "use client";
 
 import { getDemoData } from '@/api/dataFetchApi';
-import CustomPieChart from '@/component/CustomPieChart';
 import { useYearMonthSelector } from '@/hooks/useYearMonthSelector';
 import React, { useEffect, useMemo, useState } from 'react';
 import { create } from 'zustand';
+import dynamic from 'next/dynamic';
+const CustomPieChart = dynamic(() => import('@/component/CustomPieChart'), { ssr: false });
 
 type Props = {};
 
@@ -17,7 +18,7 @@ const useAppStore = create<Store>((set) => ({
   setSelectedApp: (app) => set({ selectedApp: app }),
 }));
 
-export const getColorForApp = (name: string) => {
+const getColorForApp = (name: string) => {
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -31,7 +32,8 @@ const Page = (props: Props) => {
   const [appChartData, setAppChartData] = useState<any[]>([]);
   const [campaignChartData, setCampaignChartData] = useState<any[]>([]);
   const { selectedApp, setSelectedApp } = useAppStore();
-  const { selected, YearMonthSelector } = useYearMonthSelector();
+  const { selected, setSelected, YearMonthSelector } = useYearMonthSelector();
+
 
   // 앱별 Highcharts 옵션
   const appChartOptions: Highcharts.Options = useMemo(() => ({
@@ -138,7 +140,9 @@ const Page = (props: Props) => {
       console.error("Fetch Error:", error.message);
     }
   };
-
+  useEffect(() => {
+    setSelected({ year: 2021, month: undefined });
+  }, [])
   useEffect(() => {
     fetchData();
     setSelectedApp(null)

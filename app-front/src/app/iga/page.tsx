@@ -1,11 +1,15 @@
 "use client"
 
 import { getDemoData } from '@/api/dataFetchApi';
-import CustomPieChart from '@/component/CustomPieChart';
 import React, { useEffect, useMemo, useState } from 'react';
 import { MaterialReactTable, MRT_ColumnDef } from 'material-react-table';
 import { convertDotNetDate } from '@/common/format';
 import { useYearMonthSelector } from '@/hooks/useYearMonthSelector';
+import { useExcelExport } from '@/hooks/useExcelExport';
+import dynamic from 'next/dynamic';
+const CustomPieChart = dynamic(() => import('@/component/CustomPieChart'), { ssr: false });
+
+
 type CampaignItem = {
   CampaignName: string;
   Revenue: number;
@@ -25,7 +29,12 @@ const Page = (props: Props) => {
   const [data, setData] = useState<any>(null);
   const [chartData, setChartData] = useState<{ name: string; y: number }[]>([]);
   const [gridData, setGridData] = useState<GridColumn[]>([]);
-  const { selected, YearMonthSelector } = useYearMonthSelector();
+  const { selected, setSelected, YearMonthSelector } = useYearMonthSelector();
+  const { exportToExcel } = useExcelExport();
+
+
+
+
   // 하이차트 옵션
   const options: Highcharts.Options = {
     chart: {
@@ -124,12 +133,27 @@ const Page = (props: Props) => {
   }, [data]);
 
   useEffect(() => {
+    setSelected({ year: 2021, month: undefined });
+  }, [])
+
+  useEffect(() => {
     fetchData();
   }, [selected]);
+
+  // 엑셀 다운로드 핸들러
+  const handleExportToExcel = () => {
+    exportToExcel(gridData, '캠페인_수익_데이터');
+  };
+
 
   return (
     <div>
       <h2>캠페인별 수익 비용</h2>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+        <button onClick={handleExportToExcel} style={{ padding: '5px 10px', cursor: 'pointer' }}>
+          엑셀 다운로드
+        </button>
+      </div>
       <YearMonthSelector />
       <CustomPieChart options={options} />
       <MaterialReactTable
