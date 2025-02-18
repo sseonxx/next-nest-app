@@ -13,7 +13,8 @@ export const getData = async (search_year: number, search_month?: number | null)
     method: 'POST',
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ search_year, search_month }),
-    cache: search_month ? 'no-store' : 'force-cache' // 기본 연도는 빌드 시 캐싱, 이후는 실시간 요청
+    // cache: search_month ? 'no-store' : 'force-cache' // 기본 연도는 빌드 시 캐싱, 이후는 실시간 요청
+     cache: search_year === 2021 && !search_month ? 'force-cache' : 'no-store'
   });
 
   if (!response.ok) {

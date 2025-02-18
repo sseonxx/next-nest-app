@@ -77,10 +77,16 @@ export default function ClientComponent({ defaultData }: Props) {
 
   // 📡 선택된 연도/월 변경 시만 fetch
   useEffect(() => {
-    if (selected.year !== 2021 || selected.month) {
-      fetchData();
+    if (selected.year === 2021 && (selected.month === null || selected.month === undefined)) {
+      setData(defaultData);
+      return;
     }
+    fetchData();
   }, [selected.year, selected.month]);
+
+  useEffect(() => {
+    setData(defaultData);
+  }, [defaultData]);
 
   return (
     <div className="mt-6">
