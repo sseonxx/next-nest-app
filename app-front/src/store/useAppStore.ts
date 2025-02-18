@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 type StoreState = {
   selected: { year: number; month?: number | null };
-  setSelected: (newSelected: { year: number; month?: number }) => void;
+  setSelected: (newSelected: { year: number; month?: number | undefined }) => void;
 
   isLoading: boolean,
   setIsLoading: (isLoading: boolean) => void;
